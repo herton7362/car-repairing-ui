@@ -2,6 +2,7 @@ import axios from 'axios';
 import env from '../../build/env';
 import semver from 'semver';
 import packjson from '../../package.json';
+import qs from 'qs';
 
 let util = {
 
@@ -24,6 +25,27 @@ util.ajax = axios.create({
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
     }
+});
+
+// 添加请求拦截器
+util.ajax.interceptors.request.use(function (config) {
+    // 在发送请求之前做些什么
+    let token = localStorage.accessToken;
+    if(config.method === 'post') {
+        config.data = qs.stringify({
+            access_token: token,
+            ...qs.parse(config.data)
+        })
+    } else if(config.method === 'get') {
+        config.params = {
+            access_token: token,
+            ...config.params
+        }
+    }
+    return config;
+}, function (error) {
+    // 对请求错误做些什么
+    return Promise.reject(error);
 });
 
 // 添加响应拦截器

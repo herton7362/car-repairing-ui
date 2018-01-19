@@ -38,7 +38,7 @@
         },
         methods: {
             loadGrid () {
-                util.ajax('/api/admin?access_token=9349fea7-e0fe-44f3-aeeb-18a6095141de&sort=sortNumber%2CupdatedDate&order=asc%2Cdesc&pageSize=15&currentPage=1')
+                util.ajax('/api/admin?sort=sortNumber%2CupdatedDate&order=asc%2Cdesc&pageSize=15&currentPage=1')
                     .then((response) => {
                         this.data = response.data.content;
                     })
