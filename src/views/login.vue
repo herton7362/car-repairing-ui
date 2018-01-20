@@ -69,7 +69,7 @@ export default {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
-                        .then((response)=>{  console.log(response)
+                        .then((response)=>{
                             Cookies.set('user', this.form.userName);
                             this.$store.commit('setAvator', 'https://www.dldjshop.com/attachment/download/2c911f2460a044dc0160e4464d790002');
                             this.$store.commit('setAccessToken', response.data);

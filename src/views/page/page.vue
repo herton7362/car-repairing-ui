@@ -4,7 +4,17 @@
 
 <template>
     <Card>
-        <table-search-form :fields="searchFields"></table-search-form>
+        <fold class="margin-bottom-large">
+            <Form label-position="left" :label-width="80" inline>
+                <FormItem class="padding-right-medium" label="field.title" style="width: 30%">
+                    <Input></Input>
+                </FormItem>
+                <FormItem style="width: 30%">
+                    <Button type="primary">查询</Button>
+                    <Button type="ghost">重置</Button>
+                </FormItem>
+            </Form>
+        </fold>
         <Row>
             <Button type="primary"> <Icon type="plus"></Icon> 新建</Button>
         </Row>
@@ -16,7 +26,6 @@
 
 <script>
 import data from './data/data';
-import tableSearchForm from '../my-components/table-extention/search-form/search-form.vue';
 
 export default {
     name: 'page',
@@ -95,7 +104,6 @@ export default {
                     }
                 }
             ],
-            searchFields: [],
             data: data
         }
     },

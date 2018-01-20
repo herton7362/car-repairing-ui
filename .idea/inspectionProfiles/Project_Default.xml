@@ -4,10 +4,12 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="3">
+          <list size="5">
             <item index="0" class="java.lang.String" itemvalue="long" />
             <item index="1" class="java.lang.String" itemvalue="label-position" />
             <item index="2" class="java.lang.String" itemvalue="inline" />
+            <item index="3" class="java.lang.String" itemvalue="placeholder" />
+            <item index="4" class="java.lang.String" itemvalue="size" />
           </list>
         </value>
       </option>
@@ -16,7 +18,7 @@
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="11">
+          <list size="14">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -28,6 +30,9 @@
             <item index="8" class="java.lang.String" itemvalue="formitem" />
             <item index="9" class="java.lang.String" itemvalue="div" />
             <item index="10" class="java.lang.String" itemvalue="p" />
+            <item index="11" class="java.lang.String" itemvalue="row" />
+            <item index="12" class="java.lang.String" itemvalue="modal" />
+            <item index="13" class="java.lang.String" itemvalue="page" />
           </list>
         </value>
       </option>

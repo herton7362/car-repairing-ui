@@ -112,11 +112,19 @@
     height: 0;
     border-bottom: 2px solid #dcdcdc;
 }
+
 .notwrap{
     word-break:keep-all; 
     white-space:nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.ivu-btn{
+    .ivu-icon+span,
+    span+.ivu-icon{
+        margin-left: 8px;
+    }
 }
 
 [v-cloak]{
