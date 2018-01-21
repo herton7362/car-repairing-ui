@@ -4,12 +4,14 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="5">
+          <list size="7">
             <item index="0" class="java.lang.String" itemvalue="long" />
             <item index="1" class="java.lang.String" itemvalue="label-position" />
             <item index="2" class="java.lang.String" itemvalue="inline" />
             <item index="3" class="java.lang.String" itemvalue="placeholder" />
             <item index="4" class="java.lang.String" itemvalue="size" />
+            <item index="5" class="java.lang.String" itemvalue="scope" />
+            <item index="6" class="java.lang.String" itemvalue="slot-scope" />
           </list>
         </value>
       </option>

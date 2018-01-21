@@ -24,7 +24,11 @@ export default {
     methods: {
         onExpand(expand) {
             this.expanded = expand;
-            this.$emit('on-expand', expand);
+            if(expand) {
+                this.$emit('on-expand', expand)
+            } else {
+                setTimeout(()=>this.$emit('on-expand', expand), 200)
+            }
         }
     }
 };
