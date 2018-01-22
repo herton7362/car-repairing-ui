@@ -1,8 +1,5 @@
 import axios from 'axios';
 import env from '../../build/env';
-import semver from 'semver';
-import packjson from '../../package.json';
-import qs from 'qs';
 
 let util = {
 
@@ -13,10 +10,13 @@ util.title = function (title) {
 };
 
 const ajaxUrl = env === 'development'
-    ? 'http://localhost:8080'
+    ? 'http://127.0.0.1:8080'
     : env === 'production'
         ? 'https://www.url.com'
         : 'https://debug.url.com';
+
+util.client_id = env === 'development'? 'tonr' : 'tonr';
+util.client_secret = env === 'development'? 'secret' : 'secret';
 
 util.ajax = axios.create({
     baseURL: ajaxUrl,
@@ -38,6 +38,19 @@ util.ajax.interceptors.request.use(function (config) {
     return config;
 }, function (error) {
     // 对请求错误做些什么
+    if(500 === error.response.status) {
+        this.$Message.error('系统内部错误，请联系系统管理员');
+    } else if(406 === error.response.status) {
+        this.$Message.warning(error.response.data);
+    } else if(401 === error.response.status) {
+        this.$router.push({
+            name: '403'
+        });
+    } else if(403 === error.response.status) {
+        this.$router.push({
+            name: '403'
+        });
+    }
     return Promise.reject(error);
 });
 
@@ -278,6 +291,35 @@ util.fullscreenEvent = function (vm) {
     vm.$store.commit('updateMenulist');
     // 全屏相关
 };
+
+util.transformTreeData = function (data, titleKey, defaultExpanded = true) {
+    let [map, roots, node] = [{}, []];
+    data.forEach((d)=>{
+        d.title = d[titleKey];
+        d.expand = defaultExpanded;
+        map[d.id] = d;
+        if(!d.parent || !d.parent.id) {
+            roots.push(d);
+        }
+    });
+
+    for(let key of Object.getOwnPropertyNames(map)) {
+        node = map[key];
+        if(!node.parent) {
+            continue;
+        }
+        let parent = map[node.parent.id];
+        if(!parent) {
+            roots.push(node);
+            continue;
+        }
+        parent.children = parent.children || [];
+        if(!util.oneOf(node, parent.children)){
+            parent.children.push(node);
+        }
+    }
+    return roots;
+}
 
 // util.onWheel = function (ele, callback) {
 //     ele.addEventListener('mousewheel', function (e) {

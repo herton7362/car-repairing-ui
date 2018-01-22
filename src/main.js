@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import iView from 'iview';
+import iViewExpand from './views/my-components/iview-expand/index';
 import {router} from './router/index';
 import {appRouter} from './router/router';
 import store from './store';
@@ -10,6 +11,7 @@ import VueI18n from 'vue-i18n';
 import { VirtualScroller } from 'vue-virtual-scroller';
 
 Vue.use(VueI18n);
+iViewExpand.expand(iView);
 Vue.use(iView);
 
 new Vue({
@@ -27,6 +29,7 @@ new Vue({
         this.$store.commit('initCachepage');
         // 权限菜单过滤相关
         this.$store.commit('updateMenulist');
+        setInterval(()=>this.$store.commit('refreshToken'), 3 * 1000);
     },
     created () {
         let tagsList = [];

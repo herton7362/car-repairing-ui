@@ -183,6 +183,14 @@ const app = {
             }
             state.pageOpenedList.push(tagObj);
             localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList);
+        },
+        refreshToken() {
+            if(new Date().getTime() > window.localStorage.expiration - 10 * 1000) {
+                Util.ajax.post(`/refresh/token?appId=${Util.client_id}&appSecret=${Util.client_secret}&refreshToken=${window.localStorage.refreshToken}`)
+                    .then((response)=>{
+                        this.$store.commit('setAccessToken', response.data);
+                    });
+            }
         }
     }
 };

@@ -5,7 +5,7 @@
 
 <template>
     <div>
-        <fold @on-expand="onFoldExpand" class="margin-bottom-large">
+        <fold @on-expand="onFoldExpand" :class="{'margin-bottom-large': expandable}" :expandable="expandable">
             <Form ref="queryForm" label-position="left" :model="table.queryParams" :label-width="80" inline>
                 <slot name="query-form" :params="table.queryParams"/>
                 <div class="search-btn" :class="{expanded}">
@@ -16,6 +16,7 @@
         </fold>
         <Row>
             <Button type="primary" @click="openNewModal"> <Icon type="plus"></Icon><span>新建</span></Button>
+            <slot name="actions"/>
         </Row>
         <Row class="margin-top-medium">
             <Table border :columns="table.columns" :data="table.data"></Table>
@@ -44,6 +45,12 @@
         },
         props: {
             columns: {
+                type: Array,
+                default() {
+                    return [];
+                }
+            },
+            actions: {
                 type: Array,
                 default() {
                     return [];
@@ -87,7 +94,7 @@
                         {
                             title: '操作',
                             key: 'action',
-                            width: 150,
+                            width: 150 + (this.actions.length * 40),
                             align: 'center',
                             render: (h, params) => {
                                 return h('div', [
@@ -112,6 +119,9 @@
                                                 transfer: true,
                                                 title: '您确认删除这条内容吗？'
                                             },
+                                            style: {
+                                                marginRight: '5px'
+                                            },
                                             on: {
                                                 'on-ok': () => {
                                                     this.remove(params.row)
@@ -126,7 +136,8 @@
                                                 }
                                             }, '删除')
                                         ]
-                                    )
+                                    ),
+                                    ...this.actions.map((action)=>action(h, params))
                                 ]);
                             }
                         }
@@ -138,6 +149,7 @@
                     queryParams: {}
                 },
                 expanded: false,
+                expandable: false,
                 form: {
                     modal: false,
                     loading: true,
@@ -155,6 +167,9 @@
                 this.loadGrid();
             },
             onFoldExpand(expand) {
+                if(this.$refs.queryForm.fields.length > 2) {
+                    this.expandable = true;
+                }
                 if(expand) {
                     this.expanded = expand;
                     this.$refs.queryForm.fields.forEach((field, index)=>{

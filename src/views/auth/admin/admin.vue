@@ -47,78 +47,78 @@
 </template>
 
 <script>
-    import util from '@/libs/util';
-    import singleTable from '@/views/my-components/single-table/single-table.vue';
+import util from '@/libs/util';
+import singleTable from '@/views/my-components/single-table/single-table.vue';
 
-    export default {
-        name: 'single-page',
-        components: {
-            singleTable
-        },
-        data() {
-            return {
-                table: {
-                    columns: [
-                        {key:'loginName', title:'登录名'},
-                        {key:'name', title:'姓名'},
-                        {
-                            key:'roles',
-                            title:'角色',
-                            render: (h, params) => {
-                                const tags = [];
-                                params.row.roles.forEach((role)=>{
-                                    tags.push(h('Tag', {
-                                        props: {
-                                            color: 'green'
-                                        }
-                                    }, role.name))
-                                });
-                                return h('div', tags);
-                            }
+export default {
+    name: 'admin',
+    components: {
+        singleTable
+    },
+    data() {
+        return {
+            table: {
+                columns: [
+                    {key:'loginName', title:'登录名'},
+                    {key:'name', title:'姓名'},
+                    {
+                        key:'roles',
+                        title:'角色',
+                        render: (h, params) => {
+                            const tags = [];
+                            params.row.roles.forEach((role)=>{
+                                tags.push(h('Tag', {
+                                    props: {
+                                        color: 'green'
+                                    }
+                                }, role.name))
+                            });
+                            return h('div', tags);
                         }
+                    }
+                ]
+            },
+            form: {
+                rule: {
+                    loginName: [
+                        { required: true, message: '请填写登录名', trigger: 'blur' }
+                    ],
+                    name: [
+                        { required: true, message: '请填写名称', trigger: 'blur' }
+                    ],
+                    roleIds: [
+                        { type:'array', required: true, message: '请选择角色', trigger: 'change' }
                     ]
                 },
-                form: {
-                    rule: {
-                        loginName: [
-                            { required: true, message: '请填写登录名', trigger: 'blur' }
-                        ],
-                        name: [
-                            { required: true, message: '请填写名称', trigger: 'blur' }
-                        ],
-                        roleIds: [
-                            { type:'array', required: true, message: '请选择角色', trigger: 'change' }
-                        ]
-                    },
-                    data: {
-                        id: null,
-                        loginName: null,
-                        name: null,
-                        password: null,
-                        roleIds: []
-                    }
-                },
-                roles: []
-            }
-        },
-        methods: {
-            loadRole() {
-                util.ajax.get('/api/role', {
-                    params: {
-                        sort: 'sortNumber,updatedDate',
-                        order: 'asc,desc'
-                    }
-                }) .then((response) => {
-                    this.roles = response.data.content;
-                })
+                data: {
+                    id: null,
+                    loginName: null,
+                    name: null,
+                    password: null,
+                    roleIds: []
+                }
             },
-            formTransformResponse(response) {
-                response.data.password = null;
-                return response;
-            }
-        },
-        mounted() {
-            this.loadRole();
+            roles: []
         }
-    };
+    },
+    methods: {
+        loadRole() {
+            util.ajax.get('/api/role', {
+                params: {
+                    sort: 'sortNumber,updatedDate',
+                    order: 'asc,desc'
+                }
+            }) .then((response) => {
+                this.roles = response.data.content;
+            })
+        },
+        formTransformResponse(response) {
+            response.data.password = null;
+            return response;
+        }
+    },
+    mounted() {
+        this.loadRole();
+    }
+};
 </script>
