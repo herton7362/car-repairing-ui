@@ -118,7 +118,8 @@ util.handleTitle = function (vm, item) {
 util.setCurrentPath = function (vm, name) {
     let title = '';
     let isOtherRouter = false;
-    vm.$store.state.app.routers.forEach(item => {
+    const routers = vm.$store.state.app.routers;
+    routers.forEach(item => {
         if (item.children.length === 1) {
             if (item.children[0].name === name) {
                 title = util.handleTitle(vm, item);
@@ -141,7 +142,7 @@ util.setCurrentPath = function (vm, name) {
     if (name === 'home_index') {
         currentPathArr = [
             {
-                title: util.handleTitle(vm, util.getRouterObjByName(vm.$store.state.app.routers, 'home_index')),
+                title: util.handleTitle(vm, util.getRouterObjByName(routers, 'home_index')),
                 path: '',
                 name: 'home_index'
             }
@@ -149,7 +150,7 @@ util.setCurrentPath = function (vm, name) {
     } else if ((name.indexOf('_index') >= 0 || isOtherRouter) && name !== 'home_index') {
         currentPathArr = [
             {
-                title: util.handleTitle(vm, util.getRouterObjByName(vm.$store.state.app.routers, 'home_index')),
+                title: util.handleTitle(vm, util.getRouterObjByName(routers, 'home_index')),
                 path: '/home',
                 name: 'home_index'
             },
@@ -160,7 +161,7 @@ util.setCurrentPath = function (vm, name) {
             }
         ];
     } else {
-        let currentPathObj = vm.$store.state.app.routers.filter(item => {
+        let currentPathObj = routers.filter(item => {
             if (item.children.length <= 1) {
                 return item.children[0].name === name;
             } else {
@@ -295,7 +296,10 @@ util.fullscreenEvent = function (vm) {
 util.transformTreeData = function (data, titleKey, defaultExpanded = true) {
     let [map, roots, node] = [{}, []];
     data.forEach((d)=>{
-        d.title = d[titleKey];
+        if(titleKey) {
+            d.title = d[titleKey];
+            d.label = d[titleKey];
+        }
         d.expand = defaultExpanded;
         map[d.id] = d;
         if(!d.parent || !d.parent.id) {

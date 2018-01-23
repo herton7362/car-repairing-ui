@@ -4,7 +4,8 @@
 
 <template>
     <Card>
-        <single-table :columns="table.columns"
+        <single-table ref="table"
+                      :columns="table.columns"
                       form-title="管理员维护"
                       domain-url="admin"
                       :form-rule="form.rule"
@@ -37,9 +38,11 @@
                     <Input v-model="props.data.password" type="password" placeholder="密码为空则不修改"/>
                 </FormItem>
                 <FormItem label="角色" prop="roleIds" type="array">
-                    <Select v-model="props.data.roleIds" multiple placeholder="请选择你的角色">
-                        <Option v-for="role in roles" :value="role.id" :key="role.id">{{role.name}}</Option>
-                    </Select>
+                    <CheckboxGroup v-model="props.data.roleIds">
+                        <Checkbox :label="role.id" v-for="role in roles" :key="role.id">
+                            {{role.name}}
+                        </Checkbox>
+                    </CheckboxGroup>
                 </FormItem>
             </template>
         </single-table>
@@ -51,7 +54,7 @@ import util from '@/libs/util';
 import singleTable from '@/views/my-components/single-table/single-table.vue';
 
 export default {
-    name: 'admin',
+    name: 'admin_list',
     components: {
         singleTable
     },
@@ -119,6 +122,7 @@ export default {
     },
     mounted() {
         this.loadRole();
+        this.$refs.table.loadGrid();
     }
 };
 </script>

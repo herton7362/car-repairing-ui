@@ -210,10 +210,12 @@
             },
             openNewModal() {
                 this.$refs.form.resetFields();
+                this.$emit('on-new-modal-open');
                 this.form.data.id = null;// 解决清空表单id不会删除问题
                 this.form.modal = true;
             },
             openEditModal(row) {
+                this.$emit('on-edit-modal-open');
                 this.$refs.form.resetFields();
                 util.ajax.get(`/api/${this.domainUrl}/${row.id}`).then((response) => {
                     response = this.formTransformResponse(response);
@@ -225,7 +227,12 @@
                 this.$refs.queryForm.resetFields();
                 this.loadGrid();
             },
-            loadGrid () {
+            loadGrid ({
+                          silent = false // 不触发事件
+            } = {}) {
+                if(!silent) {
+                    this.$emit('on-load');
+                }
                 util.ajax.get(`/api/${this.domainUrl}`, {
                     params: {
                         currentPage: this.table.currentPage,
@@ -246,7 +253,6 @@
             }
         },
         mounted() {
-            this.loadGrid();
             this.initQueryForm();
         }
     };

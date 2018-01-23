@@ -56,6 +56,7 @@ export default {
         this.$nextTick(() => {
             if (this.$refs.sideMenu) {
                 this.$refs.sideMenu.updateOpened();
+                this.$refs.sideMenu.updateActiveName();
             }
         });
     }

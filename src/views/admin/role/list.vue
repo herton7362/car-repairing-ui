@@ -1,11 +1,12 @@
 <style lang="less">
     @import '../../../styles/common.less';
-    @import 'role.less';
+    @import 'list.less';
 </style>
 
 <template>
     <Card>
-        <single-table :columns="table.columns"
+        <single-table ref="table"
+                      :columns="table.columns"
                       :actions="table.actions"
                       form-title="角色维护"
                       domain-url="role"
@@ -50,7 +51,7 @@ import util from '@/libs/util';
 import singleTable from '@/views/my-components/single-table/single-table.vue';
 
 export default {
-    name: 'role',
+    name: 'role_list',
     components: {
         singleTable
     },
@@ -186,6 +187,7 @@ export default {
     },
     mounted() {
         this.loadModules();
+        this.$refs.table.loadGrid();
     }
 };
 </script>

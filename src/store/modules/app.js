@@ -1,4 +1,4 @@
-import {otherRouter, appRouter} from '@/router/router';
+import {routers, otherRouter, appRouter} from '@/router/router';
 import Util from '@/libs/util';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
@@ -34,6 +34,12 @@ const app = {
     mutations: {
         setTagsList (state, list) {
             state.tagsList.push(...list);
+        },
+        setAppRouter(state, appRouter) {
+            state.routers = [
+                otherRouter,
+                ...appRouter
+            ]
         },
         updateMenulist (state) {
             let accessCode = parseInt(Cookies.get('access'));

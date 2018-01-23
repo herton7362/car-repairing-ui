@@ -55,70 +55,12 @@ export const otherRouter = {
 };
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
-export const appRouter = [
-    {
-        path: '/group',
-        icon: 'ios-folder',
-        name: 'group',
-        title: 'Group',
-        component: Main,
-        children: [
-            {
-                path: 'page1',
-                icon: 'ios-paper-outline',
-                name: 'page1',
-                title: 'Page1',
-                component: resolve => { require(['@/views/group/page1/page1.vue'], resolve); }
-            },
-            {
-                path: 'page2',
-                icon: 'ios-list-outline',
-                name: 'page2',
-                title: 'Page2',
-                component: resolve => { require(['@/views/group/page2/page2.vue'], resolve); }
-            }
-        ]
-    },
-    {
-        path: '/page',
-        icon: 'ios-paper',
-        title: 'Page',
-        name: 'page',
-        component: Main,
-        children: [
-            { path: 'index', title: 'Page', name: 'page_index', component: resolve => { require(['@/views/page/page.vue'], resolve); } }
-        ]
-    },
-    {
-        path: '/auth',
-        icon: 'ios-folder',
-        name: 'auth',
-        title: '权限管理',
-        component: Main,
-        children: [
-            {
-                path: 'admin',
-                icon: 'ios-paper-outline',
-                name: 'admin',
-                title: '管理员管理',
-                component: resolve => { require(['@/views/auth/admin/admin.vue'], resolve); }
-            },
-            {
-                path: 'role',
-                icon: 'ios-paper-outline',
-                name: 'role',
-                title: '角色管理',
-                component: resolve => { require(['@/views/auth/role/role.vue'], resolve); }
-            },
-            {
-                path: 'module',
-                icon: 'ios-paper-outline',
-                name: 'module',
-                title: '模块管理',
-                component: resolve => { require(['@/views/auth/module/module.vue'], resolve); }
-            }
-        ]
-    }
+export const appRouter = [];
+
+export const errorRouters = [
+    page500,
+    page403,
+    page404
 ];
 
 // 所有上面定义的路由都要写在下面的routers里
@@ -126,8 +68,5 @@ export const routers = [
     loginRouter,
     otherRouter,
     locking,
-    ...appRouter,
-    page500,
-    page403,
-    page404
+    ...appRouter
 ];
