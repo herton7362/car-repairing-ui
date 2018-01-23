@@ -119,10 +119,11 @@
                 if (pathArr.length >= 2) {
                     this.$store.commit('addOpenSubmenu', pathArr[1].name);
                 }
+                this.checkTag(this.$route.name);
+
                 this.userName = Cookies.get('user');
                 let messageCount = 3;
                 this.messageCount = messageCount.toString();
-                this.checkTag(this.$route.name);
                 this.$store.commit('setMessageCount', messageCount);
             },
             toggleClick () {

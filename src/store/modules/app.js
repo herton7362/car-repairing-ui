@@ -32,14 +32,22 @@ const app = {
         dontCache: ['text-editor', 'artical-publish'] // 在这里定义你不想要缓存的页面的name属性值(参见路由配置router.js)
     },
     mutations: {
-        setTagsList (state, list) {
-            state.tagsList.push(...list);
-        },
-        setAppRouter(state, appRouter) {
+        setAppRouter(state, menus) {
+            appRouter.splice(0);
+            appRouter.push(...menus);
             state.routers = [
                 otherRouter,
                 ...appRouter
-            ]
+            ];
+            let tagsList = [];
+            appRouter.map((item) => {
+                if (item.children.length <= 1) {
+                    tagsList.push(item.children[0]);
+                } else {
+                    tagsList.push(...item.children);
+                }
+            });
+            state.tagsList.push(...tagsList);
         },
         updateMenulist (state) {
             let accessCode = parseInt(Cookies.get('access'));

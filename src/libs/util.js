@@ -31,37 +31,22 @@ util.ajax = axios.create({
 util.ajax.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
     let token = localStorage.accessToken;
-    config.params = {
-        access_token: token,
-        ...config.params
+
+    if(util.hasLogin()) {
+        config.params = {
+            access_token: token,
+            ...config.params
+        }
     }
+
     return config;
 }, function (error) {
-    // 对请求错误做些什么
-    if(500 === error.response.status) {
-        this.$Message.error('系统内部错误，请联系系统管理员');
-    } else if(406 === error.response.status) {
-        this.$Message.warning(error.response.data);
-    } else if(401 === error.response.status) {
-        this.$router.push({
-            name: '403'
-        });
-    } else if(403 === error.response.status) {
-        this.$router.push({
-            name: '403'
-        });
-    }
     return Promise.reject(error);
 });
 
-// 添加响应拦截器
-util.ajax.interceptors.response.use(function (response) {
-    // 对响应数据做点什么
-    return response;
-}, function (error) {
-    // 对响应错误做点什么
-    return Promise.reject(error);
-});
+util.hasLogin = function() {
+    return !!localStorage.accessToken;
+};
 
 util.inOf = function (arr, targetArr) {
     let res = true;
@@ -74,11 +59,7 @@ util.inOf = function (arr, targetArr) {
 };
 
 util.oneOf = function (ele, targetArr) {
-    if (targetArr.indexOf(ele) >= 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return targetArr.indexOf(ele) >= 0;
 };
 
 util.showThisRoute = function (itAccess, currentAccess) {

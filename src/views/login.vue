@@ -76,6 +76,7 @@ export default {
                             this.$router.push({
                                 name: 'home_index'
                             });
+                            this.$root.loadMenu()
                         })
                         .catch((error)=>{
                             if(error.response.status === 406) {

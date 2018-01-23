@@ -11,7 +11,7 @@ export const loginRouter = {
 };
 
 export const page404 = {
-    path: '/*',
+    path: '/404',
     name: 'error-404',
     meta: {
         title: '404-页面不存在'
@@ -55,18 +55,27 @@ export const otherRouter = {
 };
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
-export const appRouter = [];
-
-export const errorRouters = [
-    page500,
-    page403,
-    page404
-];
+export const appRouter = new Proxy([], {
+    set: function (target, key, value, receiver) {
+        updateRouters();
+        return Reflect.set(target, key, value, receiver);
+    }
+});
 
 // 所有上面定义的路由都要写在下面的routers里
-export const routers = [
-    loginRouter,
-    otherRouter,
-    locking,
-    ...appRouter
-];
+export const routers = [];
+
+let updateRouters = function () {
+    routers.splice(0);
+    routers.push(...[
+        loginRouter,
+        otherRouter,
+        locking,
+        ...appRouter,
+        page500,
+        page403,
+        page404
+    ])
+};
+
+updateRouters();
