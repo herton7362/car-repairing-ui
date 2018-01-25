@@ -199,10 +199,10 @@ const app = {
             localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList);
         },
         refreshToken() {
-            if(new Date().getTime() > window.localStorage.expiration - 10 * 1000) {
+            if(new Date().getTime() > window.localStorage.expiration - 10 * 1000 && window.localStorage.refreshToken) {
                 Util.ajax.post(`/refresh/token?appId=${Util.client_id}&appSecret=${Util.client_secret}&refreshToken=${window.localStorage.refreshToken}`)
                     .then((response)=>{
-                        this.$store.commit('setAccessToken', response.data);
+                        this.commit('setAccessToken', response.data);
                     });
             }
         }

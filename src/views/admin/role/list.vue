@@ -51,7 +51,6 @@ import util from '@/libs/util';
 import singleTable from '@/views/my-components/single-table/single-table.vue';
 
 export default {
-    name: 'role_list',
     components: {
         singleTable
     },

@@ -192,9 +192,6 @@
             save() {
                 this.$refs.form.validate((valid) => {
                     if (valid) {
-                        if(!this.form.data.password) {
-                            this.form.data.password = null;
-                        }
                         util.ajax.post(`/api/${this.domainUrl}`, this.form.data).then(() => {
                             this.form.modal = false;
                             this.$Message.success('保存成功');

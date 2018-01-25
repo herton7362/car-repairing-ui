@@ -55,27 +55,15 @@ export const otherRouter = {
 };
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
-export const appRouter = new Proxy([], {
-    set: function (target, key, value, receiver) {
-        updateRouters();
-        return Reflect.set(target, key, value, receiver);
-    }
-});
+export const appRouter = [];
 
 // 所有上面定义的路由都要写在下面的routers里
-export const routers = [];
-
-let updateRouters = function () {
-    routers.splice(0);
-    routers.push(...[
-        loginRouter,
-        otherRouter,
-        locking,
-        ...appRouter,
-        page500,
-        page403,
-        page404
-    ])
-};
-
-updateRouters();
+export const routers = [
+    loginRouter,
+    otherRouter,
+    locking,
+    ...appRouter,
+    page500,
+    page403,
+    page404
+];

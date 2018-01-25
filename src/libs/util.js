@@ -45,7 +45,7 @@ util.ajax.interceptors.request.use(function (config) {
 });
 
 util.hasLogin = function() {
-    return !!localStorage.accessToken;
+    return !!localStorage.accessToken && new Date().getTime() < window.localStorage.expiration - 10 * 1000;
 };
 
 util.inOf = function (arr, targetArr) {

@@ -54,7 +54,6 @@ import util from '@/libs/util';
 import singleTable from '@/views/my-components/single-table/single-table.vue';
 
 export default {
-    name: 'admin_list',
     components: {
         singleTable
     },
