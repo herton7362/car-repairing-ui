@@ -37,7 +37,6 @@ new Vue({
             return response;
         }, (error) => {
             // 对响应错误做点什么
-            // 对请求错误做些什么
             if(500 === error.response.status) {
                 this.$Message.error('系统内部错误，请联系系统管理员');
             } else if(406 === error.response.status) {
