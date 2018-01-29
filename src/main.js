@@ -40,7 +40,7 @@ new Vue({
             if(500 === error.response.status) {
                 this.$Message.error('系统内部错误，请联系系统管理员');
             } else if(406 === error.response.status) {
-                this.$Message.warning(error.response.data);
+                this.$Message.warning(error.response.data.message);
             } else if(401 === error.response.status) {
                 router.push({
                     name: 'error-403'

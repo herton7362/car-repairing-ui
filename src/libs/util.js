@@ -18,6 +18,8 @@ const ajaxUrl = env === 'development'
 util.client_id = env === 'development'? 'tonr' : 'tonr';
 util.client_secret = env === 'development'? 'secret' : 'secret';
 
+util.baseURL = ajaxUrl;
+
 util.ajax = axios.create({
     baseURL: ajaxUrl,
     timeout: 30000,
@@ -305,6 +307,18 @@ util.transformTreeData = function (data, titleKey, defaultExpanded = true) {
     }
     return roots;
 }
+
+util.bytesToSize = function (bytes) {
+    if (!bytes) return '0 B';
+
+    var k = 1024;
+
+    var sizes = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+};
 
 // util.onWheel = function (ele, callback) {
 //     ele.addEventListener('mousewheel', function (e) {

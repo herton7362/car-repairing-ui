@@ -1,11 +1,14 @@
 <template>
     <div>
-        <h1>page1</h1>
+        <dictionary-list></dictionary-list>
     </div>
 </template>
 
 <script>
+    import dictionaryList from './list.vue';
     export default {
-        name: 'dictionary_category_list'
+        components: {
+            dictionaryList
+        }
     };
 </script>
