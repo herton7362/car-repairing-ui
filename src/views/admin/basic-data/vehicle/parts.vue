@@ -1,5 +1,5 @@
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../../../styles/common.less';
     @import './parts.less';
 </style>
 
@@ -159,6 +159,18 @@ export default {
                 columns: [
                     {key:'code', title:'零件编码'},
                     {key:'name', title:'零件名称'},
+                    {key:'modelNumber', title:'型号'},
+                    {key:'standard', title:'规格'},
+                    {key:'originPlace', title:'产地'},
+                    {key:'brand', title:'厂牌'},
+                    {
+                        key:'unit',
+                        title:'单位',
+                        render: (h, params) => {
+                            return h('span', params.row.unit? params.row.unit.name: '无');
+                        }
+                    },
+                    {key:'price', title:'价格'}
                 ]
             },
             form: {

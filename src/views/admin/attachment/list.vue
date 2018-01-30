@@ -22,6 +22,11 @@
                         <span>{{row.name}}</span>
                         <div class="bottom clearfix">
                             <span class="size">{{row.size | sizeFormatter}}</span>
+                            <Poptip confirm transfer title="您确认删除这条附件吗？" @on-ok="remove(row)" style="float:right">
+                                <Button type="error" size="small">
+                                    <Icon type="trash-a"></Icon>
+                                </Button>
+                            </Poptip>
                         </div>
                     </div>
                 </Card>
@@ -75,6 +80,12 @@
             onPageSizeChange(pageSize) {
                 this.pageSize = pageSize;
                 this.loadAttachemnts();
+            },
+            remove(row) {
+                util.ajax.delete(`/api/attachment/${row.id}`).then(() => {
+                    this.$Message.success('删除成功');
+                    this.loadAttachemnts();
+                });
             },
             loadAttachemnts() {
                 util.ajax.get('/api/attachment', {

@@ -58,9 +58,6 @@
                             <FormItem class="padding-right-medium" prop="name" label="名称">
                                 <Input v-model="props.data.name" placeholder="名称"/>
                             </FormItem>
-                            <FormItem class="padding-right-medium" prop="code" label="编码">
-                                <Input v-model="props.data.code" placeholder="编码"/>
-                            </FormItem>
                         </template>
                     </single-table>
                 </Row>
@@ -133,7 +130,6 @@ export default {
             },
             table: {
                 columns: [
-                    {key:'code', title:'编码'},
                     {key:'name', title:'名称'}
                 ]
             },
@@ -202,7 +198,7 @@ export default {
         },
         openNewTreeModal() {
             this.$refs.treeForm.resetFields();
-            this.tree.form.id = null;
+            this.tree.form.data.id = null;
             this.tree.form.data.parentId = this.tree.selected.id || 'root';
             this.tree.form.modal = true;
         },
