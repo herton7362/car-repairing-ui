@@ -104,10 +104,10 @@
                     data: {
                         id: null,
                         name: null,
-                        workTypeId: null,
+                        workTypeId: '',
                         workType: null,
                         manHourPrice: null,
-                        workingTeamId: null,
+                        workingTeamId: '',
                         workingTeam: null,
                         partIds: [],
                         parts: []

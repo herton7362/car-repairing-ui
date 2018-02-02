@@ -73,10 +73,7 @@ export default {
                             Cookies.set('user', this.form.userName);
                             this.$store.commit('setAvator', 'https://www.dldjshop.com/attachment/download/2c911f2460a044dc0160e4464d790002');
                             this.$store.commit('setAccessToken', response.data);
-                            this.$router.loadMenu();
-                            this.$router.push({
-                                name: 'home_index'
-                            })
+                            window.location.reload();
                         })
                         .catch((error)=>{
                             if(error.response.status === 406) {

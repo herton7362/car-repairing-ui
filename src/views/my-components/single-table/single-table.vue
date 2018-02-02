@@ -26,7 +26,7 @@
                   @on-change="onPageChange"
                   @on-page-size-change="onPageSizeChange" show-sizer show-elevator></Page>
         </Row>
-        <Modal v-model="form.modal" :title="formTitle" :loading="form.loading" @on-ok="save">
+        <Modal v-model="form.modal" :title="formTitle" :loading="form.loading" @on-ok="save" :width="modalWidth">
             <Form ref="form" :model="form.data" :rules="formRule" :label-width="80">
                 <slot name="edit-form" :data="form.data"/>
             </Form>
@@ -57,6 +57,7 @@
                 }
             },
             domainUrl: String,
+            modalWidth: Number,
             formTitle: {
                 type: String,
                 default: '窗口'
@@ -68,6 +69,18 @@
                 }
             },
             formData: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
+            queryParams: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
+            defaultQueryParams: {
                 type: Object,
                 default() {
                     return {};
@@ -146,7 +159,7 @@
                     total: 0,
                     currentPage: 1,
                     pageSize: 10,
-                    queryParams: {}
+                    queryParams: this.queryParams
                 },
                 expanded: false,
                 expandable: false,
@@ -234,7 +247,8 @@
                     params: {
                         currentPage: this.table.currentPage,
                         pageSize: this.table.pageSize,
-                        ...this.table.queryParams
+                        ...this.table.queryParams,
+                        ...this.defaultQueryParams
                     }
                 }).then((response) => {
                     response = this.tableTransformResponse(response);

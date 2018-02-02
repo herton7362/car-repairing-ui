@@ -112,7 +112,7 @@ export default {
                         id: null,
                         name: null,
                         parent: {},
-                        parentId: null,
+                        parentId: '',
                         code: null
                     },
                     rule: {
@@ -145,7 +145,7 @@ export default {
                 data: {
                     id: null,
                     dictionaryCategory: null,
-                    dictionaryCategoryId: null,
+                    dictionaryCategoryId: '',
                     name: null,
                     code: null
                 }
@@ -159,9 +159,6 @@ export default {
             } else {
                 this.tree.form.data.parent = this.tree.form.select.data.find((d)=>d.id === val);
             }
-        },
-        'form.data.dictionaryCategoryId'(val) {
-            this.form.data.dictionaryCategory = this.tree.form.select.data.find((d)=>d.id === val);
         }
     },
     methods: {
@@ -279,6 +276,9 @@ export default {
         }
     },
     mounted() {
+        this.$refs.table.$watch( 'form.data.dictionaryCategoryId', (val) => {
+            this.$refs.table.form.data.dictionaryCategory = this.tree.form.select.data.find((d)=>d.id === val);
+        })
         this.loadTreeData();
     }
 };

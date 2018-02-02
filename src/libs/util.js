@@ -320,6 +320,20 @@ util.bytesToSize = function (bytes) {
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 };
 
+util.executeGenerator = function (gen){
+    var g = gen();
+
+    function next(data){
+        var result = g.next(data);
+        if (result.done) return result.value;
+        result.value.then(function(data){
+            next(data);
+        });
+    }
+
+    next();
+}
+
 // util.onWheel = function (ele, callback) {
 //     ele.addEventListener('mousewheel', function (e) {
 //         callback(e, e.wheelDelta);

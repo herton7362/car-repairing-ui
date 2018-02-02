@@ -143,7 +143,7 @@ export default {
                         id: null,
                         name: null,
                         parent: {},
-                        parentId: null
+                        parentId: ''
                     },
                     rule: {
                         name: [
@@ -185,7 +185,7 @@ export default {
                 data: {
                     id: null,
                     category: null,
-                    categoryId: null,
+                    categoryId: '',
                     code: null,
                     name: null,
                     modelNumber: null,
@@ -193,7 +193,7 @@ export default {
                     originPlace: null,
                     brand: null,
                     unit: null,
-                    unitId: null,
+                    unitId: '',
                     price: null
                 }
             }
@@ -206,12 +206,6 @@ export default {
             } else {
                 this.tree.form.data.parent = this.tree.form.select.data.find((d)=>d.id === val);
             }
-        },
-        'form.data.categoryId'(val) {
-            this.form.data.category = this.tree.form.select.data.find((d)=>d.id === val);
-        },
-        'form.data.unitId'(val) {
-            this.form.data.unit = this.form.unitSelect.data.find((d)=>d.id === val);
         }
     },
     methods: {
@@ -340,6 +334,12 @@ export default {
         }
     },
     mounted() {
+        this.$refs.table.$watch('form.data.categoryId', (val) => {
+            this.form.data.category = this.tree.form.select.data.find((d)=>d.id === val);
+        });
+        this.$refs.table.$watch('form.data.unitId', (val) => {
+            this.$refs.table.form.data.unit = this.form.unitSelect.data.find((d)=>d.id === val);
+        });
         this.loadTreeData();
         this.loadUnit();
     }
