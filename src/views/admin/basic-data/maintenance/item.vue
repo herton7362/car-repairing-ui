@@ -10,6 +10,7 @@
                       domain-url="maintenanceItem"
                       :form-rule="form.rule"
                       :form-data="form.data"
+                      :modal-width="800"
                       :form-transform-response="formTransformResponse">
             <template slot="query-form" slot-scope="props">
                 <FormItem class="padding-right-medium" prop="name" label="名称">
@@ -21,29 +22,33 @@
                 <FormItem prop="name" label="项目名称">
                     <Input v-model="props.data.name" placeholder="请输入项目名称" style="width: 250px"/>
                 </FormItem>
-                <FormItem label="工种" prop="workTypeId">
-                    <Select v-model="props.data.workTypeId"  placeholder="请选择工种" style="width: 200px">
-                        <Option :value="workType.id" v-for="workType in form.workTypes" :key="workType.id">
-                            {{workType.name}}
-                        </Option>
-                    </Select>
-                </FormItem>
-                <FormItem prop="manHourPrice" label="工时金额">
-                    <InputNumber :step="1.0" v-model="props.data.manHourPrice" placeholder="请输入工时金额"/>
-                </FormItem>
-                <FormItem label="班组" prop="workingTeamId">
-                    <Select v-model="props.data.workingTeamId"  placeholder="请选择班组" style="width: 200px">
-                        <Option :value="workingTeam.id" v-for="workingTeam in form.workingTeams" :key="workingTeam.id">
-                            {{workingTeam.name}}
-                        </Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="零件" prop="partIds" type="array">
-                    <Select v-model="props.data.partIds"  placeholder="请选择所需零件" multiple filterable>
-                        <Option :value="part.id" v-for="part in form.parts" :key="part.id">
-                            {{part.name}}
-                        </Option>
-                    </Select>
+                <Row>
+                    <Col :span="9">
+                        <FormItem label="工种" prop="workTypeId">
+                            <Select v-model="props.data.workTypeId"  placeholder="请选择工种">
+                                <Option :value="workType.id" v-for="workType in form.workTypes" :key="workType.id">
+                                    {{workType.name}}
+                                </Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col :span="9">
+                        <FormItem label="班组" prop="workingTeamId">
+                            <Select v-model="props.data.workingTeamId"  placeholder="请选择班组">
+                                <Option :value="workingTeam.id" v-for="workingTeam in form.workingTeams" :key="workingTeam.id">
+                                    {{workingTeam.name}}
+                                </Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col :span="6">
+                        <FormItem prop="manHourPrice" label="工时金额">
+                            <InputNumber :step="1.0" v-model="props.data.manHourPrice" placeholder="请输入工时金额"/>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <FormItem label="配件项目">
+                    <parts-picker ref="partsPicker" @on-selection-change="onSelectParts"></parts-picker>
                 </FormItem>
             </template>
         </single-table>
@@ -53,10 +58,12 @@
 <script>
     import util from '@/libs/util';
     import singleTable from '@/views/my-components/single-table/single-table.vue';
+    import PartsPicker from '../../reg-entrust-form/parts-picker.vue';
 
     export default {
         components: {
-            singleTable
+            singleTable,
+            PartsPicker
         },
         data() {
             return {
@@ -100,7 +107,6 @@
                     },
                     workTypes: [],
                     workingTeams: [],
-                    parts: [],
                     data: {
                         id: null,
                         name: null,
@@ -109,8 +115,7 @@
                         manHourPrice: null,
                         workingTeamId: '',
                         workingTeam: null,
-                        partIds: [],
-                        parts: []
+                        partses: []
                     }
                 }
             }
@@ -122,11 +127,6 @@
                 }
                 if(response.data.workingTeam) {
                     response.data.workingTeamId = response.data.workingTeam.id;
-                }
-                if(response.data.parts) {
-                    response.data.partIds = response.data.parts.map((part)=>part.id);
-                } else {
-                    response.data.partIds = [];
                 }
                 return response;
             },
@@ -143,12 +143,9 @@
                     this.form.workingTeams = response.data;
                 })
             },
-            loadParts() {
-                util.ajax.get('/api/parts', {
-                    sort:'sortNumber,updatedDate',
-                    order: 'asc,desc'
-                }).then((response)=>{
-                    this.form.parts = response.data;
+            onSelectParts(selection) {
+                this.$refs.table.form.data.partses = selection.map((s)=> {
+                    return {parts:s, count: s.count}
                 })
             }
         },
@@ -159,13 +156,9 @@
             this.$refs.table.$watch('form.data.workingTeamId', (val)=>{
                 this.$refs.table.form.data.workingTeam = this.form.workingTeams.find((d)=>d.id === val);
             });
-            this.$refs.table.$watch('form.data.partIds', (val)=>{
-                this.$refs.table.form.data.parts = this.form.parts.filter((part)=>util.oneOf(part.id, val));
-            });
             this.$refs.table.loadGrid();
             this.loadWorkTypes();
             this.loadWorkingTeams();
-            this.loadParts();
         }
     };
 </script>

@@ -19,14 +19,19 @@
             <slot name="actions"/>
         </Row>
         <Row class="margin-top-medium">
-            <Table border :columns="table.columns" :data="table.data"></Table>
+            <Table :columns="table.columns" :data="table.data"></Table>
         </Row>
         <Row class="margin-top-medium">
             <Page :total="table.total"
                   @on-change="onPageChange"
                   @on-page-size-change="onPageSizeChange" show-sizer show-elevator></Page>
         </Row>
-        <Modal v-model="form.modal" :title="formTitle" :loading="form.loading" @on-ok="save" :width="modalWidth">
+        <Modal v-model="form.modal"
+               :title="formTitle"
+               :loading="form.loading"
+               :mask-closable="maskClosable"
+               @on-ok="save"
+               :width="modalWidth">
             <Form ref="form" :model="form.data" :rules="formRule" :label-width="80">
                 <slot name="edit-form" :data="form.data"/>
             </Form>
@@ -97,6 +102,16 @@
                 default(response) {
                     return response
                 }
+            },
+            formTransformData: {
+                type: Function,
+                default(data) {
+                    return data
+                }
+            },
+            maskClosable: {
+                type: Boolean,
+                default: true
             }
         },
         data() {
@@ -205,18 +220,24 @@
             save() {
                 this.$refs.form.validate((valid) => {
                     if (valid) {
-                        util.ajax.post(`/api/${this.domainUrl}`, this.form.data).then(() => {
+                        util.ajax.post(`/api/${this.domainUrl}`, this.formTransformData(this.form.data)).then(() => {
                             this.form.modal = false;
                             this.$Message.success('保存成功');
                             this.loadGrid();
-                        })
-                    } else {
-                        this.form.loading = false;
-                        this.$nextTick(() => {
-                            this.form.loading = true;
+                        }).catch((error)=>{
+                            this.clearFormLoading();
+                            return Promise.reject(error);
                         });
+                    } else {
+                        this.clearFormLoading();
                     }
                 })
+            },
+            clearFormLoading() {
+                this.form.loading = false;
+                this.$nextTick(() => {
+                    this.form.loading = true;
+                });
             },
             openNewModal() {
                 this.$refs.form.resetFields();

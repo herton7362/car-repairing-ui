@@ -177,6 +177,9 @@ export default {
                 rule: {
                     name: [
                         { required: true, message: '请填写零件名称', trigger: 'blur' }
+                    ],
+                    unitId: [
+                        { required: true, message: '请选择单位', trigger: 'change' }
                     ]
                 },
                 unitSelect: {
