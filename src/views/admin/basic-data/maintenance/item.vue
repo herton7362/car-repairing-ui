@@ -11,6 +11,7 @@
                       :form-rule="form.rule"
                       :form-data="form.data"
                       :modal-width="800"
+                      :mask-closable="false"
                       :form-transform-response="formTransformResponse">
             <template slot="query-form" slot-scope="props">
                 <FormItem class="padding-right-medium" prop="name" label="名称">
@@ -58,7 +59,7 @@
 <script>
     import util from '@/libs/util';
     import singleTable from '@/views/my-components/single-table/single-table.vue';
-    import PartsPicker from '../../reg-entrust-form/parts-picker.vue';
+    import PartsPicker from '../../entrust-form/parts-picker.vue';
 
     export default {
         components: {
@@ -91,7 +92,9 @@
                             key:'parts',
                             title:'零件',
                             render: (h, params) => {
-                                return h('span', params.row.parts.map((part)=>part.name).join('，'));
+                                return h('span', params.row.partses.map((part)=>{
+                                    return part.parts? `${part.parts.name} x${part.count}`: ''
+                                }).join('，'));
                             }
                         }
                     ]
@@ -127,6 +130,15 @@
                 }
                 if(response.data.workingTeam) {
                     response.data.workingTeamId = response.data.workingTeam.id;
+                }
+                this.$refs.partsPicker.clearSelect();
+                if(response.data.partses && response.data.partses.length) {
+                    this.$refs.partsPicker.select(response.data.partses.map((s)=> {
+                        return {
+                            ...s.parts,
+                            count: s.count
+                        };
+                    }));
                 }
                 return response;
             },

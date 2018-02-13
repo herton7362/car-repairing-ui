@@ -157,20 +157,19 @@ export default {
             },
             table: {
                 columns: [
-                    {key:'code', title:'零件编码'},
+                    {key:'code', title:'零件编码', width: 100},
                     {key:'name', title:'零件名称'},
                     {key:'modelNumber', title:'型号'},
-                    {key:'standard', title:'规格'},
-                    {key:'originPlace', title:'产地'},
-                    {key:'brand', title:'厂牌'},
+                    {key:'standard', title:'规格', width: 100},
                     {
                         key:'unit',
                         title:'单位',
+                        width: 80,
                         render: (h, params) => {
                             return h('span', params.row.unit? params.row.unit.name: '无');
                         }
                     },
-                    {key:'price', title:'价格'}
+                    {key:'price', title:'价格', width: 100, align: 'right'}
                 ]
             },
             form: {

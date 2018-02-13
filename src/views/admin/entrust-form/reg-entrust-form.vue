@@ -16,17 +16,23 @@
                       :query-params="queryParams"
                       :default-query-params="defaultQueryParams"
                       :form-transform-response="formTransformResponse"
+                      :form-transform-data="formTransformData"
                       :mask-closable="false"
+                      :table-transform-query-params="tableTransformQueryParams"
+                      @on-new-modal-open="onNewModalOpen"
                       @on-load="onTableLoad">
             <template slot="query-form" slot-scope="props">
-                <FormItem class="padding-right-medium" prop="vehicle.engineNumber" label="引擎号">
-                    <Input v-model="props.params['vehicle.engineNumber']" placeholder="引擎号"/>
+                <FormItem class="padding-right-medium" prop="orderNumber" label="委托单号">
+                    <Input v-model="props.params.orderNumber" placeholder="委托单号"/>
                 </FormItem>
                 <FormItem class="padding-right-medium" prop="vehicle.plateNumber" label="车牌号">
-                    <Input v-model="props.params['vehicle.plateNumber']" placeholder="车牌号"/>
+                    <Input v-model="props.params.vehicle.plateNumber" placeholder="车牌号"/>
+                </FormItem>
+                <FormItem class="padding-right-medium" prop="vehicle.engineNumber" label="引擎号">
+                    <Input v-model="props.params.vehicle.engineNumber" placeholder="引擎号"/>
                 </FormItem>
                 <FormItem class="padding-right-medium" prop="vehicle.frameNumber" label="车架号">
-                    <Input v-model="props.params['vehicle.frameNumber']" placeholder="车架号"/>
+                    <Input v-model="props.params.vehicle.frameNumber" placeholder="车架号"/>
                 </FormItem>
             </template>
 
@@ -126,16 +132,14 @@
                         </FormItem>
                     </Col>
                 </Row>
-                <Row>
-                    <FormItem label="维修项目" required>
-                        <maintenance-item-picker ref="itemPicker" @on-selection-change="onSelectItem"></maintenance-item-picker>
-                    </FormItem>
-                </Row>
-                <Row>
-                    <FormItem label="维修配件" required>
-                        <parts-picker ref="partsPicker" @on-selection-change="onSelectParts"></parts-picker>
-                    </FormItem>
-                </Row>
+                <FormItem label="维修项目" required>
+                    <maintenance-item-picker ref="itemPicker"
+                                             @on-selection-change="onSelectionChangeItem"
+                                             @on-select="onSelectItem"></maintenance-item-picker>
+                </FormItem>
+                <FormItem label="维修配件" required>
+                    <parts-picker ref="partsPicker" @on-selection-change="onSelectionChangeParts"></parts-picker>
+                </FormItem>
             </template>
         </single-table>
     </Card>
@@ -146,6 +150,7 @@
     import SingleTable from '@/views/my-components/single-table/single-table.vue';
     import MaintenanceItemPicker from './maintenance-item-picker.vue';
     import PartsPicker from './parts-picker.vue';
+    import entrustFormColumns from './entrust-form-columns.js';
 
     export default {
         components: {
@@ -156,57 +161,15 @@
         data() {
             return {
                 table: {
-                    columns: [
-                        {key: 'orderNumber',title: '委托单号'},
-                        {
-                            key: 'vehicle',
-                            title: '引擎号',
-                            render(h, param){
-                                return h('span', param.row.vehicle.engineNumber)
-                            }
-                        },
-                        {
-                            key: 'vehicle',
-                            title: '车牌号',
-                            render(h, param){
-                                return h('span', param.row.vehicle.plateNumber)
-                            }
-                        },
-                        {
-                            key: 'vehicle',
-                            title: '车架号',
-                            render(h, param){
-                                return h('span', param.row.vehicle.frameNumber)
-                            }
-                        },
-                        {
-                            key: 'operatorId',
-                            title: '接车员',
-                            render(h, param){
-                                let span = h('span',[h('Spin')]);
-                                util.ajax.get(`/api/admin/${param.row.operatorId}`).then((response)=>{
-                                    span.elm.innerHTML = response.data.name;
-                                })
-                                return span;
-                            }
-                        },
-                        {
-                            key: 'clerkId',
-                            title: '业务员',
-                            render(h, param){
-                                let span = h('span',[h('Spin')]);
-                                util.ajax.get(`/api/admin/${param.row.clerkId}`).then((response)=>{
-                                    span.elm.innerHTML = response.data.name;
-                                })
-                                return span;
-                            }
-                        }
-                    ]
+                    columns: entrustFormColumns
                 },
                 queryParams: {
                     vehicle: {}
                 },
-                defaultQueryParams: {},
+                defaultQueryParams: {
+                    sort: 'sortNumber,updatedDate',
+                    order: 'asc,desc'
+                },
                 form: {
                     rule: {
                         'vehicle.plateNumber': [
@@ -260,17 +223,6 @@
                         items: [],
                         partses: []
                     }
-                },
-                parts: {
-                    columns: [
-                        {key: 'name',title: '配件项目'},
-                        {key: 'modelNumber',title: '型号'},
-                        {key: 'standard',title: '规格'},
-                        {key: 'count',title: '数量 单位'},
-                        {key: 'price',title: '单价', align: 'right'},
-                        {key: 'subtotal',title: '金额', align: 'right'}
-                    ],
-                    data: []
                 }
             }
         },
@@ -302,6 +254,20 @@
                     }));
                 }
                 return response;
+            },
+            tableTransformQueryParams(queryParams) {
+                queryParams['vehicle.engineNumber'] = queryParams.vehicle.engineNumber;
+                queryParams['vehicle.plateNumber'] = queryParams.vehicle.plateNumber;
+                queryParams['vehicle.frameNumber'] = queryParams.vehicle.frameNumber;
+                return queryParams;
+            },
+            formTransformData(data) {
+                data.status = 'NEW';
+                return data;
+            },
+            onNewModalOpen() {
+                this.$refs.itemPicker.clearSelect();
+                this.$refs.partsPicker.clearSelect();
             },
             loadVehicles() {
                 util.ajax.get('/api/vehicle', {
@@ -352,13 +318,22 @@
                 this.loadVehicles();
             },
             onSelectItem(selection) {
+                selection.forEach((s)=> {
+                    // 同时把项目中配置好的零件加入
+                    this.$refs.partsPicker.select(s.partses.map((s)=> {
+                        return {
+                            ...s.parts,
+                            count: s.count
+                        };
+                    }));
+                });
+            },
+            onSelectionChangeItem(selection) {
                 this.$refs.table.form.data.items = selection.map((s)=> {
                     return {maintenanceItem:s}
                 });
-                // 同时把项目中配置好的零件加入
-                
             },
-            onSelectParts(selection) {
+            onSelectionChangeParts(selection) {
                 this.$refs.table.form.data.partses = selection.map((s)=> {
                     return {parts:s, count: s.count}
                 })
@@ -381,7 +356,7 @@
             this.$refs.table.$watch('form.data.vehicle.vehicleCategories', function(val) {
                 this.form.data.vehicle.vehicleCategoryId = val[1];
             })
-            this.defaultQueryParams['admin.id'] = this.loginUser.id;
+            this.defaultQueryParams['creator.id'] = this.loginUser.id;
             this.$refs.table.loadGrid();
             this.loadVehicles();
             this.loadInsuranceCompanies();

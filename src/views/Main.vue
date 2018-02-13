@@ -110,6 +110,9 @@
             },
             mesCount () {
                 return this.$store.state.app.messageCount;
+            },
+            loginUser() {
+                return this.$store.state.user.loginUser;
             }
         },
         methods: {
@@ -121,7 +124,7 @@
                 }
                 this.checkTag(this.$route.name);
 
-                this.userName = Cookies.get('user');
+                this.userName = this.loginUser.name;
                 let messageCount = 3;
                 this.messageCount = messageCount.toString();
                 this.$store.commit('setMessageCount', messageCount);

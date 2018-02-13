@@ -23,6 +23,7 @@
 
 <script>
     import util from '@/libs/util';
+    import partsColumn from './parts-column';
     export default {
         name: 'parts-picker',
         props: {
@@ -37,9 +38,7 @@
             return {
                 table: {
                     columns: [
-                        {key: 'name',title: '配件项目'},
-                        {key: 'modelNumber',title: '型号',width: 100,align: 'center'},
-                        {key: 'standard',title: '规格',width: 100, align: 'center'},
+                        ...partsColumn,
                         {
                             title: '数量 单位',
                             width: 120,
@@ -48,9 +47,12 @@
                                 return h('span', [
                                     h('InputNumber', {
                                         props: {
-                                            size: 'small',
-                                            v: {
-                                                model: params.row.count
+                                            value: params.row.count,
+                                            size: 'small'
+                                        },
+                                        on: {
+                                            'input': (val) => {
+                                                this.table.data[params.index].count = val;
                                             }
                                         },
                                         style: {
@@ -62,7 +64,6 @@
                                 ])
                             }
                         },
-                        {key: 'price',title: '单价',width: 100, align: 'right'},
                         {
                             title: '操作',
                             key: 'action',
@@ -103,9 +104,7 @@
                 parts: {
                     columns: [
                         {type: 'selection',width: 60,align: 'center'},
-                        {key: 'name',title: '配件项目'},
-                        {key: 'modelNumber',title: '型号',width: 100,align: 'center'},
-                        {key: 'standard',title: '规格',width: 100, align: 'center'},
+                        ...partsColumn,
                         {
                             title: '单位',
                             width: 80,
@@ -113,8 +112,7 @@
                             render: (h, params)=>{
                                 return h('span', params.row.unit.name);
                             }
-                        },
-                        {key: 'price',title: '单价',width: 100}
+                        }
                     ],
                     data: [],
                     selection: []
@@ -131,7 +129,7 @@
                     sort: 'sortNumber,updatedDate',
                     order: 'asc,desc'
                 }).then((response)=>{
-                    this.parts.data = response.data;
+                    this.parts.data = response.data.map((d)=> ({count: 1, ...d}));
                 })
             },
             openModal() {
@@ -139,60 +137,26 @@
                 this.$refs.selection.selectAll(false);
             },
             chose() {
-                let exist = this.select(this.selection);
-                if(exist) {
-                    this.$refs.selection.selectAll(false);
-                    this.form.loading = false;
-                    this.$nextTick(() => {
-                        this.form.loading = true;
-                    });
-                    return exist;
-                }
+                this.select(this.selection);
                 this.form.modal = false;
+                this.$emit('on-select', this.selection);
             },
             select(selection) {
                 let exist = false;
                 selection.forEach((s)=>{
-                    if(this.table.data.some((d, i)=>{
-                            if(d.id === s.id) {
-                                this.hilightRow(d.id);
-                                return true;
-                            }
-                        })) {
-                        this.$Notice.warning({
-                            title: '您已经选择过此项目',
-                            desc: '项目 ' + s.name + ' 已经添加到维修项目中。'
-                        });
-                        exist = true;
-                    }
+                    this.table.data.forEach((d)=>{
+                        if(d.id === s.id) {
+                            d.count += s.count || 1;
+                            exist = true;
+                        }
+                    })
                 });
-                if(exist) {
-                    return exist;
+                if(!exist) {
+                    this.table.data.push(...selection);
                 }
-                selection.forEach((s)=>s.count = s.count || 1);
-                this.table.data.push(...selection);
-                this.$emit('on-selection-change', [...this.table.data]);
-                return exist;
             },
             clearSelect() {
                 this.table.data.splice(0);
-                this.$emit('on-selection-change', []);
-            },
-            hilightRow(id) {
-                let index = 0;
-                this.parts.data.some((d, i)=>{
-                    if(d.id === id) {
-                        index = i;
-                        return true;
-                    }
-                })
-                const hilightInterval = setInterval(()=> {
-                    this.$refs.selection.objData[index]._isHighlight = !this.$refs.selection.objData[index]._isHighlight;
-                }, 120);
-                setTimeout(()=>{
-                    clearInterval(hilightInterval);
-                    this.$refs.selection.objData[index]._isHighlight = false;
-                }, 1500)
             },
             onRowClick(row, index) {
                 this.$refs.selection.toggleSelect(index);
@@ -206,6 +170,14 @@
         },
         mounted() {
             this.loadParts();
+        },
+        watch: {
+            'table.data': {
+                handler(val) {
+                    this.$emit('on-selection-change', [...val]);
+                },
+                deep: true
+            }
         }
     }
 </script>

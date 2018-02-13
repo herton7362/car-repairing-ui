@@ -23,6 +23,7 @@
 
 <script>
     import util from '@/libs/util';
+    import maintenanceItemColumn from './maintenance-item-column';
     export default {
         name: 'maintenance-item-picker',
         props: {
@@ -37,26 +38,7 @@
             return {
                 table: {
                     columns: [
-                        {key: 'name',title: '维修项目'},
-                        {
-                            key: 'workingTeam',
-                            title: '班组',
-                            align: 'center',
-                            width: 120,
-                            render(h, param) {
-                                return h('span', param.row.workingTeam.name)
-                            }
-                        },
-                        {
-                            key: 'workType',
-                            title: '工种',
-                            align: 'center',
-                            width: 120,
-                            render(h, param) {
-                                return h('span', param.row.workingTeam.name)
-                            }
-                        },
-                        {key: 'manHourPrice',title: '工时金额', align: 'right'},
+                        ...maintenanceItemColumn,
                         {
                             title: '操作',
                             key: 'action',
@@ -97,26 +79,7 @@
                 maintenanceItem: {
                     columns: [
                         {type: 'selection',width: 60,align: 'center'},
-                        {key: 'name',title: '维修项目'},
-                        {
-                            key: 'workingTeam',
-                            title: '班组',
-                            align: 'center',
-                            width: 100,
-                            render(h, param) {
-                                return h('span', param.row.workingTeam.name)
-                            }
-                        },
-                        {
-                            key: 'workType',
-                            title: '工种',
-                            align: 'center',
-                            width: 100,
-                            render(h, param) {
-                                return h('span', param.row.workingTeam.name)
-                            }
-                        },
-                        {key: 'manHourPrice',title: '工时金额', width: 100}
+                        ...maintenanceItemColumn
                     ],
                     data: [],
                     selection: []
@@ -151,16 +114,17 @@
                     return exist;
                 }
                 this.form.modal = false;
+                this.$emit('on-select', this.selection);
             },
             select(selection) {
                 let exist = false;
                 selection.forEach((s)=>{
                     if(this.table.data.some((d, i)=>{
-                            if(d.id === s.id) {
-                                this.hilightRow(d.id);
-                                return true;
-                            }
-                        })) {
+                        if(d.id === s.id) {
+                            this.hilightRow(d.id);
+                            return true;
+                        }
+                    })) {
                         this.$Notice.warning({
                             title: '您已经选择过此项目',
                             desc: '项目 ' + s.name + ' 已经添加到维修项目中。'
@@ -172,12 +136,10 @@
                     return exist;
                 }
                 this.table.data.push(...selection);
-                this.$emit('on-selection-change', [...this.table.data]);
                 return exist;
             },
             clearSelect() {
                 this.table.data.splice(0);
-                this.$emit('on-selection-change', []);
             },
             hilightRow(id) {
                 let index = 0;
@@ -207,6 +169,12 @@
         },
         mounted() {
             this.loadMaintenanceItems();
+        },
+        watch: {
+            'table.data'(val) {
+                this.$emit('on-selection-change', [...val]);
+            },
+            deep: true
         }
     }
 </script>

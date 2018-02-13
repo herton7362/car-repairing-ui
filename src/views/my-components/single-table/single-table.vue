@@ -5,34 +5,34 @@
 
 <template>
     <div>
-        <fold @on-expand="onFoldExpand" :class="{'margin-bottom-large': expandable}" :expandable="expandable">
-            <Form ref="queryForm" label-position="left" :model="table.queryParams" :label-width="80" inline>
-                <slot name="query-form" :params="table.queryParams"/>
-                <div class="search-btn" :class="{expanded}">
-                    <Button type="primary" @click="loadGrid">查询</Button>
-                    <Button type="ghost" @click="resetQueryForm">重置</Button>
-                </div>
-            </Form>
-        </fold>
-        <Row>
-            <Button type="primary" @click="openNewModal"> <Icon type="plus"></Icon><span>新建</span></Button>
-            <slot name="actions"/>
-        </Row>
-        <Row class="margin-top-medium">
-            <Table :columns="table.columns" :data="table.data"></Table>
-        </Row>
-        <Row class="margin-top-medium">
-            <Page :total="table.total"
-                  @on-change="onPageChange"
-                  @on-page-size-change="onPageSizeChange" show-sizer show-elevator></Page>
-        </Row>
+        <paged-table ref="table"
+                     :query-params="queryParams"
+                     :domain-url="domainUrl"
+                     :actions="table.actions"
+                     :default-query-params="defaultQueryParams"
+                     :table-transform-response="tableTransformResponse"
+                     :table-transform-query-params="tableTransformQueryParams"
+                     :search-able="table.searchAble"
+                     :columns="columns"
+                     @on-load="onLoadGrid">
+            <template slot="query-form" slot-scope="props">
+                <slot name="query-form" :params="props.params">
+
+                </slot>
+            </template>
+
+            <template slot="actions">
+                <Button type="primary" @click="openNewModal"> <Icon type="plus"></Icon><span>新建</span></Button>
+                <slot name="actions"/>
+            </template>
+        </paged-table>
         <Modal v-model="form.modal"
                :title="formTitle"
                :loading="form.loading"
                :mask-closable="maskClosable"
                @on-ok="save"
                :width="modalWidth">
-            <Form ref="form" :model="form.data" :rules="formRule" :label-width="80">
+            <Form ref="form" :model="form.data" :rules="formRule" :label-width="labelWidth">
                 <slot name="edit-form" :data="form.data"/>
             </Form>
         </Modal>
@@ -42,11 +42,13 @@
 <script>
     import util from '@/libs/util';
     import fold from '@/views/my-components/fold/fold.vue';
+    import PagedTable from './paged-table.vue'
 
     export default {
         name: 'single-table',
         components: {
-            fold
+            fold,
+            PagedTable
         },
         props: {
             columns: {
@@ -109,75 +111,72 @@
                     return data
                 }
             },
+            tableTransformQueryParams: {
+                type: Function,
+                default(data) {
+                    return data
+                }
+            },
             maskClosable: {
                 type: Boolean,
                 default: true
+            },
+            labelWidth: {
+                type: Number,
+                default: 80
             }
         },
         data() {
             return {
                 table: {
-                    columns: [
-                        ...this.columns,
-                        {
-                            title: '操作',
-                            key: 'action',
-                            width: 150 + (this.actions.length * 40),
-                            align: 'center',
-                            render: (h, params) => {
-                                return h('div', [
+                    actions: [
+                        (h, params)=> {
+                            return h('Button', {
+                                props: {
+                                    type: 'primary',
+                                    size: 'small'
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.openEditModal(params.row);
+                                    }
+                                }
+                            }, '修改')
+                        },
+                        (h, params)=> {
+                            return h('Poptip',
+                                {
+                                    props: {
+                                        confirm: true,
+                                        transfer: true,
+                                        title: '您确认删除这条内容吗？'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        'on-ok': () => {
+                                            this.remove(params.row)
+                                        }
+                                    }
+                                },
+                                [
                                     h('Button', {
                                         props: {
-                                            type: 'primary',
+                                            type: 'error',
                                             size: 'small'
-                                        },
-                                        style: {
-                                            marginRight: '5px'
-                                        },
-                                        on: {
-                                            click: () => {
-                                                this.openEditModal(params.row);
-                                            }
                                         }
-                                    }, '修改'),
-                                    h('Poptip',
-                                        {
-                                            props: {
-                                                confirm: true,
-                                                transfer: true,
-                                                title: '您确认删除这条内容吗？'
-                                            },
-                                            style: {
-                                                marginRight: '5px'
-                                            },
-                                            on: {
-                                                'on-ok': () => {
-                                                    this.remove(params.row)
-                                                }
-                                            }
-                                        },
-                                        [
-                                            h('Button', {
-                                                props: {
-                                                    type: 'error',
-                                                    size: 'small'
-                                                }
-                                            }, '删除')
-                                        ]
-                                    ),
-                                    ...this.actions.map((action)=>action(h, params))
-                                ]);
-                            }
-                        }
+                                    }, '删除')
+                                ]
+                            )
+                        },
+                        ...this.actions
                     ],
-                    data: [],
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 10,
-                    queryParams: this.queryParams
+                    searchAble: true
                 },
-                expanded: false,
-                expandable: false,
                 form: {
                     modal: false,
                     loading: true,
@@ -186,30 +185,6 @@
             }
         },
         methods: {
-            onPageChange(page) {
-                this.table.currentPage = page;
-                this.loadGrid();
-            },
-            onPageSizeChange(pageSize) {
-                this.table.pageSize = pageSize;
-                this.loadGrid();
-            },
-            onFoldExpand(expand) {
-                if(this.$refs.queryForm.fields.length > 2) {
-                    this.expandable = true;
-                }
-                if(expand) {
-                    this.expanded = expand;
-                    this.$refs.queryForm.fields.forEach((field, index)=>{
-                        index > 1 && (field.$el.style.display = 'inline-block');
-                    })
-                } else {
-                    this.expanded = expand;
-                    this.$refs.queryForm.fields.forEach((field, index)=>{
-                        index > 1 && (field.$el.style.display = 'none');
-                    })
-                }
-            },
             remove (row) {
                 util.ajax.delete(`/api/${this.domainUrl}/${row.id}`).then(() => {
                     this.form.modal = false;
@@ -255,41 +230,24 @@
                 });
             },
             resetQueryForm () {
-                this.$refs.queryForm.resetFields();
-                this.loadGrid();
+                this.$refs.table.resetQueryForm();
             },
             loadGrid ({
                           silent = false // 不触发事件
             } = {}) {
-                if(!silent) {
-                    this.$emit('on-load');
-                }
-                util.ajax.get(`/api/${this.domainUrl}`, {
-                    params: {
-                        currentPage: this.table.currentPage,
-                        pageSize: this.table.pageSize,
-                        ...this.table.queryParams,
-                        ...this.defaultQueryParams
-                    }
-                }).then((response) => {
-                    response = this.tableTransformResponse(response);
-                    this.table.data = response.data.content;
-                    this.table.total = response.data.totalElements;
-                })
+                this.$refs.table.loadGrid(silent);
             },
             clearData() {
-                this.table.data = [];
-                this.table.total = 0;
+                this.$refs.table.clearData();
             },
-            initQueryForm() {
-                this.onFoldExpand();
-                this.$refs.queryForm.fields.forEach((field)=>{
-                    field.$el.style.width = '30%';
-                });
+            onLoadGrid() {
+                this.$emit('on-load');
             }
         },
         mounted() {
-            this.initQueryForm();
+            if(!this.$scopedSlots['query-form']) {
+                this.table.searchAble = false;
+            }
         }
     };
 </script>

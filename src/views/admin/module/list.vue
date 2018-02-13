@@ -201,7 +201,7 @@ export default {
             return response;
         },
         loadGrid() {
-            const table = this.$refs.table;
+            const table = this.$refs.table.$refs.table;
             table.table.queryParams['parent.id'] = this.tree.selectedId;
             table.loadGrid({
                 silent: true
