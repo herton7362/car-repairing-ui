@@ -263,7 +263,7 @@ export default {
         loadGrid() {
             const table = this.$refs.table;
             if(this.tree.selected.id) {
-                table.table.queryParams['dictionaryCategory.id'] = this.tree.selected.id;
+                table.$refs.table.table.queryParams['dictionaryCategory.id'] = this.tree.selected.id;
                 table.loadGrid({
                     silent: true
                 });

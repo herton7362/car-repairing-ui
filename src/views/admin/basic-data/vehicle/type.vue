@@ -142,7 +142,7 @@
             },
             loadGrid() {
                 const table = this.$refs.table;
-                table.table.queryParams['parent.id'] = this.tree.selectedId;
+                table.$refs.table.table.queryParams['parent.id'] = this.tree.selectedId;
                 table.loadGrid({
                     silent: true
                 });

@@ -4,10 +4,7 @@
 
 <template>
     <Card>
-        <paged-table ref="table"
-                      :columns="table.columns"
-                     :actions="table.actions"
-                      domain-url="dispatchForm">
+        <paged-table ref="table" :columns="table.columns" url="/api/drawingForm" :actions="table.actions">
             <template slot="query-form" slot-scope="props">
                 <FormItem class="padding-right-medium" prop="orderNumber" label="派工单号">
                     <Input v-model="props.params.orderNumber" placeholder="派工单号"/>
@@ -15,16 +12,13 @@
                 <FormItem class="padding-right-medium" prop="status" label="状态">
                     <RadioGroup v-model="props.params.status">
                         <Radio label="">全部</Radio>
-                        <Radio label="NEW">新建</Radio>
-                        <Radio label="DRAWING">领料</Radio>
+                        <Radio label="NEW">待审核</Radio>
+                        <Radio label="OUT_STORE">出库</Radio>
                     </RadioGroup>
                 </FormItem>
                 <FormItem class="padding-right-medium" prop="entrustFormOrderNumber" label="委托单号">
                     <Input v-model="props.params.entrustFormOrderNumber" placeholder="委托单号"/>
                 </FormItem>
-            </template>
-
-            <template slot="edit-form" slot-scope="props">
             </template>
         </paged-table>
         <entrust-form-modal ref="entrustFormModal"></entrust-form-modal>
@@ -33,19 +27,19 @@
 
 <script>
     import util from '@/libs/util';
-    import PagedTable from '@/views/my-components/single-table/paged-table.vue';
     import EntrustFormModal from '../entrust-form/entrust-form-modal.vue';
+    import PagedTable from '@/views/my-components/single-table/paged-table.vue';
 
     export default {
         components: {
-            PagedTable,
-            EntrustFormModal
+            EntrustFormModal,
+            PagedTable
         },
         data() {
             return {
                 table: {
                     columns: [
-                        {key:'orderNumber', title:'派工单号'},
+                        {key:'orderNumber', title:'领料单号'},
                         {
                             key:'entrustFormOrderNumber',
                             title:'委托单号',
@@ -97,9 +91,9 @@
                             title: '状态',
                             render(h, param){
                                 if(param.row.status === 'NEW') {
-                                    return h('Tag', {props: {type: 'dot',color: 'blue',size: 'small'}}, '新建');
-                                } else if(param.row.status === 'DRAWING') {
-                                    return h('Tag', {props: {type: 'dot',color: 'yellow',size: 'small'}}, '领料');
+                                    return h('Tag', {props: {type: 'dot',color: 'blue',size: 'small'}}, '待审核');
+                                } else if(param.row.status === 'OUT_STORE') {
+                                    return h('Tag', {props: {type: 'dot',color: 'yellow',size: 'small'}}, '已出库');
                                 }
                             }
                         }
@@ -120,27 +114,34 @@
                                         },
                                         on: {
                                             click: () => {
-                                                this.draw(params.row);
+                                                this.outStore(params.row);
                                             }
                                         }
-                                    }, '领料')
+                                    }, '出库')
                                 ])
                             }
                         }
                     ]
+                },
+                form: {
+                    rule: {
+                    },
+                    data: {
+                        id: null
+                    }
                 }
             }
         },
         methods: {
-            draw(row) {
-                util.ajax.post(`/api/dispatchForm/draw/${row.id}`).then(()=>{
-                    this.$Message.success('生成领料单成功');
-                    this.$refs.table.loadGrid();
-                });
-            },
             formTransformResponse(response) {
                 response.data.password = null;
                 return response;
+            },
+            outStore(row) {
+                util.ajax.post(`/api/drawingForm/outStore/${row.id}`).then(()=>{
+                    this.$Message.success('生成出库单成功');
+                    this.$refs.table.loadGrid();
+                });
             }
         },
         mounted() {
