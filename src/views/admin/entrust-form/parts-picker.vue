@@ -4,7 +4,7 @@
 <template>
     <div>
         <Table :columns="table.columns" :data="table.data"></Table>
-        <a href="javascript:void(0)" @click="openModal">添加配件</a>
+        <a v-if="editable" href="javascript:void(0)" @click="openModal">添加配件</a>
         <Modal v-model="form.modal"
                title="选择配件项目"
                :transfer="false"
@@ -32,9 +32,50 @@
                 default() {
                     return []
                 }
+            },
+            editable: {
+                true: Boolean,
+                default: true
             }
         },
         data() {
+            let actions = [];
+            if(this.editable) {
+                actions.push({
+                    title: '操作',
+                    key: 'action',
+                    width: 80,
+                    align: 'center',
+                    render: (h, params) => {
+                        return h('div', [
+                            h('Poptip',
+                                {
+                                    props: {
+                                        confirm: true,
+                                        transfer: true,
+                                        title: '您确认删除这条内容吗？'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        'on-ok': () => {
+                                            this.remove(params.index)
+                                        }
+                                    }
+                                },
+                                [
+                                    h('a', {
+                                        props: {
+                                            href: 'javascript:void(0)'
+                                        }
+                                    }, '删除')
+                                ]
+                            )
+                        ]);
+                    }
+                })
+            }
             return {
                 table: {
                     columns: [
@@ -51,8 +92,13 @@
                                             size: 'small'
                                         },
                                         on: {
-                                            'input': (val) => {
-                                                this.table.data[params.index].count = val;
+                                            'on-change': (val) => {
+                                                if(this.inputTimeout) {
+                                                    clearTimeout(this.inputTimeout);
+                                                }
+                                                this.inputTimeout = setTimeout(()=>{
+                                                    this.table.data[params.index].count = val;
+                                                }, 500)
                                             }
                                         },
                                         style: {
@@ -64,42 +110,10 @@
                                 ])
                             }
                         },
-                        {
-                            title: '操作',
-                            key: 'action',
-                            width: 80,
-                            align: 'center',
-                            render: (h, params) => {
-                                return h('div', [
-                                    h('Poptip',
-                                        {
-                                            props: {
-                                                confirm: true,
-                                                transfer: true,
-                                                title: '您确认删除这条内容吗？'
-                                            },
-                                            style: {
-                                                marginRight: '5px'
-                                            },
-                                            on: {
-                                                'on-ok': () => {
-                                                    this.remove(params.index)
-                                                }
-                                            }
-                                        },
-                                        [
-                                            h('a', {
-                                                props: {
-                                                    href: 'javascript:void(0)'
-                                                }
-                                            }, '删除')
-                                        ]
-                                    )
-                                ]);
-                            }
-                        }
+                        ...actions
                     ],
-                    data: this.defaultSelection
+                    data: this.defaultSelection,
+                    inputTimeout: null
                 },
                 parts: {
                     columns: [

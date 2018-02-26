@@ -12,15 +12,20 @@
                       :modal-width="800"
                       :form-rule="form.rule"
                       :form-data="form.data"
-                      :query-params="queryParams"
                       :default-query-params="defaultQueryParams"
                       :form-transform-data="formTransformData"
                       :form-transform-response="formTransformResponse"
+                      :table-transform-query-params="tableTransformQueryParams"
                       :mask-closable="false"
                       @on-new-modal-open="onNewModalOpen">
             <template slot="query-form" slot-scope="props">
                 <FormItem class="padding-right-medium" prop="orderNumber" label="采购单号">
                     <Input v-model="props.params.orderNumber" placeholder="采购单号"/>
+                </FormItem>
+                <FormItem class="padding-right-medium" prop="purchaseDate" label="采购日期">
+                    <DatePicker type="daterange"
+                                placeholder="采购日期"
+                                v-model="props.params.purchaseDate"></DatePicker>
                 </FormItem>
             </template>
 
@@ -66,6 +71,7 @@
                 table: {
                     columns: [
                         {key: 'orderNumber',title: '采购单号'},
+                        {key: 'purchaseDate',title: '采购日期'},
                         {
                             key: 'clerkId',
                             title: '业务员',
@@ -80,6 +86,7 @@
                         {
                             key: 'status',
                             title: '状态',
+                            align: 'center',
                             render(h, param){
                                 if(param.row.status === 'NEW') {
                                     return h('Tag', {props: {type: 'dot',color: 'blue',size: 'small'}}, '待审核');
@@ -89,9 +96,6 @@
                             }
                         }
                     ]
-                },
-                queryParams: {
-                    vehicle: {}
                 },
                 defaultQueryParams: {
                     sort: 'sortNumber,updatedDate',
@@ -103,7 +107,7 @@
                             { required: true, message: '请选择业务员', trigger: 'change' }
                         ],
                         purchaseDate: [
-                            { required: true, message: '请选择采购日期', trigger: 'change' }
+                            { required: true, message: '请选择采购日期', trigger: 'change', type: 'date' }
                         ]
                     },
                     data: {
@@ -139,6 +143,12 @@
             formTransformData(data) {
                 data.status = 'NEW';
                 return data;
+            },
+            tableTransformQueryParams(data) {
+                return Object.assign({}, data, {
+                    purchaseDate: data.purchaseDate && data.purchaseDate[0]?[util.dateFormat(data.purchaseDate[0], 'yyyy-MM-dd HH:mm:ss'),
+                        util.dateFormat(data.purchaseDate[1], 'yyyy-MM-dd HH:mm:ss')]: null
+                });
             },
             onSelectionChangeParts(selection) {
                 this.$refs.table.form.data.partses = selection.map((s)=> {

@@ -36,26 +36,23 @@
             PagedTable
         },
         data() {
+            const constructStoreOptions = (h)=> {
+                let options = [];
+                this.form.stores.forEach((store)=>{
+                    options.push(h('Option', {
+                        props: {
+                            value: store.id,
+                            key: store.id
+                        }
+                    }, store.name))
+                })
+                return options;
+            }
             return {
                 table: {
                     columns: [
                         {key:'orderNumber', title:'领料单号'},
-                        {
-                            key:'entrustFormOrderNumber',
-                            title:'委托单号',
-                            render: (h, params) => {
-                                return h('a', {
-                                    props: {
-                                        href: 'javascript:void(0)'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.$refs.entrustFormModal.getForm(params.row.entrustFormId);
-                                        }
-                                    }
-                                }, params.row.entrustFormOrderNumber)
-                            }
-                        },
+                        {key:'entrustFormOrderNumber', title:'委托单号'},
                         {
                             key:'workingTeamId',
                             title:'班组',
@@ -101,9 +98,9 @@
                     actions: [
                         (h, params)=> {
                             if(params.row.status === 'NEW') {
-                                return  h('Tooltip', {
+                                return  h('Poptip', {
                                     props: {
-                                        content: '生成领料单',
+                                        content: '生成出库单',
                                         placement: 'top'
                                     }
                                 }, [
@@ -114,18 +111,69 @@
                                         },
                                         on: {
                                             click: () => {
-                                                this.outStore(params.row);
+                                                this.form.storeId = null;
                                             }
+                                        },
+                                        style: {
+                                            marginRight: '5px'
                                         }
-                                    }, '出库')
+                                    }, '出库'),
+                                    h('div', {
+                                        slot: 'content'
+                                    }, [
+                                        h('Select', {
+                                            props: {
+                                                placeholder: '请选择仓库',
+                                                value: this.form.storeId
+                                            },
+                                            on: {
+                                                input: (val) => {
+                                                    this.form.storeId = val
+                                                }
+                                            },
+                                            style: {
+                                                width: '150px'
+                                            },
+                                            slot: 'content'
+                                        }, constructStoreOptions(h)),
+                                        h('br'),
+                                        h('Button', {
+                                            props: {
+                                                type: 'success',
+                                                size: 'small',
+                                                long: true
+                                            },
+                                            class: 'margin-top-small',
+                                            on: {
+                                                click: ()=>{
+                                                    this.outStore(params.row);
+                                                }
+                                            }
+                                        }, '生成出库单')
+                                    ])
                                 ])
                             }
+                        },
+                        (h, params)=> {
+                            return h('Button', {
+                                props: {
+                                    type: 'ghost',
+                                    size: 'small'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.detail(params.row);
+                                    }
+                                }
+                            }, '详情')
                         }
                     ]
                 },
                 form: {
                     rule: {
                     },
+                    stores: [],
+                    storeId: null,
                     data: {
                         id: null
                     }
@@ -137,15 +185,30 @@
                 response.data.password = null;
                 return response;
             },
+            loadStores() {
+                util.ajax.get('/api/store').then((response)=>{
+                    this.form.stores = response.data;
+                })
+            },
             outStore(row) {
-                util.ajax.post(`/api/drawingForm/outStore/${row.id}`).then(()=>{
+                if(!this.form.storeId) {
+                    this.$Message.warning('请选择仓库');
+                    return;
+                }
+                util.ajax.post(`/api/drawingForm/outStore/${row.id}`, {
+                    storeId: this.form.storeId
+                }).then(()=>{
                     this.$Message.success('生成出库单成功');
                     this.$refs.table.loadGrid();
                 });
+            },
+            detail(row) {
+                this.$refs.entrustFormModal.getForm(row.entrustFormId);
             }
         },
         mounted() {
             this.$refs.table.loadGrid();
+            this.loadStores();
         }
     };
 </script>

@@ -140,6 +140,18 @@
                 <FormItem label="维修配件" required>
                     <parts-picker ref="partsPicker" @on-selection-change="onSelectionChangeParts"></parts-picker>
                 </FormItem>
+                <Row>
+                    <Col :span="8">
+                    <FormItem label="应付">
+                        {{form.needPay}}
+                    </FormItem>
+                    </Col>
+                    <Col :span="8">
+                    <FormItem label="实收" prop="finalPay">
+                        <InputNumber v-model="props.data.finalPay" placeholder="请填写实收金额"/>
+                    </FormItem>
+                    </Col>
+                </Row>
             </template>
         </single-table>
     </Card>
@@ -193,6 +205,9 @@
                         ],
                         clerkId: [
                             { required: true, message: '请选择业务员', trigger: 'change' }
+                        ],
+                        finalPay: [
+                            { required: true, message: '请填写实收金额', trigger: 'blur' , type: 'number' }
                         ]
                     },
                     vehicle: {},
@@ -203,6 +218,7 @@
                     vehicleCategoriesRaw: [],
                     vehicleCategories: [],
                     vehicleVisible: false,
+                    needPay: 0,
                     data: {
                         id: null,
                         vehicle: {
@@ -221,7 +237,8 @@
                         clerkId: null,
                         contactTel: null,
                         items: [],
-                        partses: []
+                        partses: [],
+                        finalPay: null
                     }
                 }
             }
@@ -242,7 +259,9 @@
                 }
                 this.$refs.itemPicker.clearSelect();
                 if(response.data.items && response.data.items.length) {
-                    this.$refs.itemPicker.select(response.data.items.map((s)=> s.maintenanceItem));
+                    this.$refs.itemPicker.select(response.data.items.map((s)=> {
+                        return s.maintenanceItem;
+                    }));
                 }
                 this.$refs.partsPicker.clearSelect();
                 if(response.data.partses && response.data.partses.length) {
@@ -332,10 +351,21 @@
                 this.$refs.table.form.data.items = selection.map((s)=> {
                     return {maintenanceItem:s}
                 });
+                this.calculateNeedPay();
             },
             onSelectionChangeParts(selection) {
                 this.$refs.table.form.data.partses = selection.map((s)=> {
                     return {parts:s, count: s.count}
+                });
+                this.calculateNeedPay();
+            },
+            calculateNeedPay() {
+                this.form.needPay = 0;
+                this.$refs.table.form.data.items.forEach((s)=>{
+                    this.form.needPay += s.maintenanceItem.manHourPrice;
+                });
+                this.$refs.table.form.data.partses.forEach((s)=>{
+                    this.form.needPay += s.count * s.parts.price;
                 })
             }
         },

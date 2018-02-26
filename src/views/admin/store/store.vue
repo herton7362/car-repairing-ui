@@ -122,8 +122,22 @@
                                 return span;
                             }
                         },
-                        {key: 'count', title: '数量'},
-                        {key: 'unit', title: '单位'}
+                        {
+                            key: 'count',
+                            title: '数量 / 单位',
+                            width: 250,
+                            align: 'right',
+                            render(h, param){
+                                let span = h('span',[h('Spin')]);
+                                util.ajax.get(`/api/parts/${param.row.relationId}`).then((response)=>{
+                                    if(param.row.count < 5) {
+                                        span.elm.style.color = 'red';
+                                    }
+                                    span.elm.innerHTML = `${param.row.count} / ${response.data.unit.name}`;
+                                })
+                                return span;
+                            }
+                        }
                     ],
                     tableDomain: '/api/store/goods/',
                     tableUrl: null
