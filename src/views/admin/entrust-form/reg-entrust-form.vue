@@ -8,6 +8,7 @@
     <Card class="reg-entrust-form">
         <single-table ref="table"
                       :columns="table.columns"
+                      :actions="table.actions"
                       form-title="登记委托单"
                       domain-url="entrustForm"
                       :modal-width="800"
@@ -146,14 +147,42 @@
                         {{form.needPay}}
                     </FormItem>
                     </Col>
-                    <Col :span="8">
-                    <FormItem label="实收" prop="finalPay">
-                        <InputNumber v-model="props.data.finalPay" placeholder="请填写实收金额"/>
-                    </FormItem>
-                    </Col>
                 </Row>
             </template>
         </single-table>
+        <Modal v-model="payForm.modal" title="收款" :loading="payForm.loading" @on-ok="pay">
+            <Form ref="payForm" :model="payForm.data" :rules="payForm.rule" :label-width="80">
+                <Row>
+                    <Col :span="8">
+                    <FormItem label="应付">
+                        {{payForm.needPay}}
+                    </FormItem>
+                    </Col>
+                    <Col :span="8">
+                    <FormItem label="会员余额">
+                        {{payForm.memberBalance}}
+                    </FormItem>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col :span="8">
+                    <FormItem label="实收" prop="finalPay">
+                        <InputNumber v-model="payForm.data.finalPay" placeholder="请填写实收金额"/>
+                    </FormItem>
+                    </Col>
+                    <Col :span="8">
+                    <FormItem label="现金" prop="cashPay">
+                        <InputNumber v-model="payForm.data.cashPay" placeholder="请填写实收金额"/>
+                    </FormItem>
+                    </Col>
+                    <Col :span="8">
+                    <FormItem label="余额" prop="balancePay">
+                        <InputNumber v-model="payForm.data.balancePay" placeholder="请填写实收金额"/>
+                    </FormItem>
+                    </Col>
+                </Row>
+            </Form>
+        </Modal>
     </Card>
 </template>
 
@@ -173,7 +202,36 @@
         data() {
             return {
                 table: {
-                    columns: entrustFormColumns
+                    columns: entrustFormColumns,
+                    actions: [
+                        (h, params)=> {
+                            if(params.row.payStatus === 'UNPAY') {
+                                return  h('Button', {
+                                    props: {
+                                        type: 'success',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.$refs.payForm.resetFields();
+                                            util.ajax.get(`/api/entrustForm/${params.row.id}`).then((response) => {
+                                                this.payForm.data = response.data;
+                                                this.payForm.needPay = 0;
+                                                this.payForm.needPay = this.calculateNeedPay(this.payForm.data);
+                                                util.ajax.get(`/api/member/${this.payForm.data.vehicle.memberId}`).then((r)=>{
+                                                    this.payForm.memberBalance = r.data.balance || 0;
+                                                })
+                                                this.payForm.modal = true;
+                                            });
+                                        }
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    }
+                                }, '收款')
+                            }
+                        }
+                    ]
                 },
                 queryParams: {
                     vehicle: {}
@@ -237,8 +295,32 @@
                         clerkId: null,
                         contactTel: null,
                         items: [],
-                        partses: [],
-                        finalPay: null
+                        partses: []
+                    }
+                },
+                payForm: {
+                    modal: false,
+                    loading: true,
+                    needPay: 0,
+                    memberBalance: 0,
+                    data: {
+                        id: null,
+                        finalPay: null,
+                        cashPay: null,
+                        balancePay: null,
+                        payType: 'OFFLINE',
+                        vehicle: {}
+                    },
+                    rule: {
+                        finalPay: [
+                            { required: true, message: '请填写实收金额', trigger: 'blur', type: 'number'}
+                        ],
+                        cashPay: [
+                            { required: true, message: '请填写现金金额', trigger: 'blur', type: 'number'}
+                        ],
+                        balancePay: [
+                            { required: true, message: '请填写余额金额', trigger: 'blur', type: 'number'}
+                        ]
                     }
                 }
             }
@@ -351,21 +433,47 @@
                 this.$refs.table.form.data.items = selection.map((s)=> {
                     return {maintenanceItem:s}
                 });
-                this.calculateNeedPay();
+                this.form.needPay = 0;
+                this.form.needPay = this.calculateNeedPay(this.$refs.table.form.data);
             },
             onSelectionChangeParts(selection) {
                 this.$refs.table.form.data.partses = selection.map((s)=> {
                     return {parts:s, count: s.count}
                 });
-                this.calculateNeedPay();
-            },
-            calculateNeedPay() {
                 this.form.needPay = 0;
-                this.$refs.table.form.data.items.forEach((s)=>{
-                    this.form.needPay += s.maintenanceItem.manHourPrice;
+                this.form.needPay = this.calculateNeedPay(this.$refs.table.form.data);
+            },
+            calculateNeedPay(data) {
+                let needPay = 0;
+                data.items.forEach((s)=>{
+                    needPay += s.maintenanceItem.manHourPrice;
                 });
-                this.$refs.table.form.data.partses.forEach((s)=>{
-                    this.form.needPay += s.count * s.parts.price;
+                data.partses.forEach((s)=>{
+                    needPay += s.count * s.parts.price;
+                });
+                return needPay;
+            },
+            pay() {
+                this.$refs.payForm.validate((valid) => {
+                    if (valid) {
+                        this.payForm.data.payType = 'OFFLINE';
+                        util.ajax.post(`/api/entrustForm/pay/${this.payForm.data.id}`, this.payForm.data).then(() => {
+                            this.payForm.modal = false;
+                            this.$Message.success('收款成功');
+                            this.$refs.table.loadGrid();
+                        }).catch((error)=>{
+                            this.payForm.loading = false;
+                            this.$nextTick(() => {
+                                this.payForm.loading = true;
+                            });
+                            return Promise.reject(error);
+                        });
+                    } else {
+                        this.payForm.loading = false;
+                        this.$nextTick(() => {
+                            this.payForm.loading = true;
+                        });
+                    }
                 })
             }
         },

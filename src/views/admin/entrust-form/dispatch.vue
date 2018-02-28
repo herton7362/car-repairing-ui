@@ -142,6 +142,9 @@
                                             type: 'primary',
                                             size: 'small'
                                         },
+                                        style: {
+                                            marginRight: '5px'
+                                        },
                                         on: {
                                             click: () => {
                                                 this.openDespatchModal(params.row);
@@ -149,19 +152,38 @@
                                         }
                                     }, '派工')
                                 ])
-                            } else {
+                            } else if(params.row.status === 'DISPATCHING') {
                                 return h('Button', {
                                     props: {
-                                        type: 'ghost',
+                                        type: 'success',
                                         size: 'small'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
                                     },
                                     on: {
                                         click: () => {
-                                            this.openViewModal(params.row);
+                                            util.ajax.post(`/api/entrustForm/finish/${params.row.id}`).then(()=>{
+                                                this.$Message.success('操作成功');
+                                                this.$refs.table.loadGrid();
+                                            });
                                         }
                                     }
-                                }, '查看')
+                                }, '俊工')
                             }
+                        },
+                        (h, params)=> {
+                            return h('Button', {
+                                props: {
+                                    type: 'ghost',
+                                    size: 'small'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.openViewModal(params.row);
+                                    }
+                                }
+                            }, '查看')
                         }
                     ]
                 },

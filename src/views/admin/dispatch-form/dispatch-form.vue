@@ -46,22 +46,7 @@
                 table: {
                     columns: [
                         {key:'orderNumber', title:'派工单号'},
-                        {
-                            key:'entrustFormOrderNumber',
-                            title:'委托单号',
-                            render: (h, params) => {
-                                return h('a', {
-                                    props: {
-                                        href: 'javascript:void(0)'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.$refs.entrustFormModal.getForm(params.row.entrustFormId);
-                                        }
-                                    }
-                                }, params.row.entrustFormOrderNumber)
-                            }
-                        },
+                        {key:'entrustFormOrderNumber',title:'委托单号'},
                         {
                             key:'workingTeamId',
                             title:'班组',
@@ -118,6 +103,9 @@
                                             type: 'primary',
                                             size: 'small'
                                         },
+                                        style: {
+                                            marginRight: '5px'
+                                        },
                                         on: {
                                             click: () => {
                                                 this.draw(params.row);
@@ -126,6 +114,19 @@
                                     }, '领料')
                                 ])
                             }
+                        },
+                        (h, params)=> {
+                            return h('Button', {
+                                props: {
+                                    type: 'ghost',
+                                    size: 'small'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.$refs.entrustFormModal.getForm(params.row.entrustFormId);
+                                    }
+                                }
+                            }, '查看')
                         }
                     ]
                 }
