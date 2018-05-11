@@ -1,5 +1,6 @@
 import axios from 'axios';
 import env from '../../build/env';
+import firstletter from './pinyin_firstletter';
 
 let util = {
 
@@ -282,6 +283,7 @@ util.transformTreeData = function (data, titleKey, defaultExpanded = true) {
         if(titleKey) {
             d.title = d[titleKey];
             d.label = d[titleKey];
+            d.value = d['id'];
         }
         d.expand = defaultExpanded;
         map[d.id] = d;
@@ -306,6 +308,30 @@ util.transformTreeData = function (data, titleKey, defaultExpanded = true) {
         }
     }
     return roots;
+}
+
+util.addPrefixForTreeData = function (data, prefix = '--') {
+    let array = [];
+    const roots = util.transformTreeData(data);
+    const sortOptions = function(rootOptions, array) {
+        rootOptions.forEach(rootOption => {
+            array.push(rootOption);
+            if(rootOption.children) {
+                sortOptions(rootOption.children, array);
+            }
+        });
+    }
+    sortOptions(roots, array);
+    const printPrefix = function(row, pf) {
+        if(row.parent) {
+            return printPrefix(row.parent, pf + prefix);
+        }
+        return pf;
+    }
+    array.forEach( n => {
+        n.name = printPrefix(n, '') + n.name;
+    });
+    return array;
 }
 
 util.bytesToSize = function (bytes) {
@@ -406,6 +432,22 @@ util.dateFormatPretty = function(date) {
         return (longtime+" error ");
     }
 };
+
+util.getFirstPinyinLetter = function(str) {
+    if(!str || /^ +$/g.test(str)) return '';
+    let result = [];
+    for(var i=0; i<str.length; i++)
+    {
+        var unicode = str.charCodeAt(i);
+        var ch = str.charAt(i);
+        if(unicode >= 19968 && unicode <= 40869)
+        {
+            ch = firstletter.all.charAt(unicode-19968);
+        }
+        result.push(ch);
+    }
+    return result.join('').toLowerCase();
+}
 
 // util.onWheel = function (ele, callback) {
 //     ele.addEventListener('mousewheel', function (e) {

@@ -44,7 +44,7 @@ export default {
     data () {
         return {
             form: {
-                userName: 'admin',
+                userName: 'admin@tonr',
                 password: '123456'
             },
             rules: {

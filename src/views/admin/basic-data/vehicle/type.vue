@@ -33,9 +33,12 @@
                             </Select>
                         </FormItem>
                         <FormItem class="padding-right-medium" prop="name" label="名称">
-                            <Input v-model="props.data.name" placeholder="请输入名称"/>
+                            <Input v-model="props.data.name" placeholder="请输入名称" @on-change="onNameChange"/>
                         </FormItem>
-                        <FormItem class="padding-right-medium" prop="logo" label="车型logo">
+                        <FormItem label="拼音码" prop="pinyin">
+                            <Input v-model="props.data.pinyin" placeholder="拼音码"/>
+                        </FormItem>
+                        <FormItem v-show="props.data.parent.id === ' '"  class="padding-right-medium" prop="logo" label="车型logo">
                             <image-uploader :default-file-list="form.uploader.defaultFileList"
                                             :pre-view="false"
                                             :on-success="onUploadSuccess"
@@ -67,7 +70,8 @@
                 },
                 table: {
                     columns: [
-                        {key:'name', title:'名称'}
+                        {key:'name', title:'名称'},
+                        {key:'pinyin', title:'拼音码'}
                     ]
                 },
                 form: {
@@ -86,6 +90,7 @@
                         id: null,
                         parent: {},
                         name: null,
+                        pinyin: null,
                         logo:null
                     },
                     uploader: {
@@ -119,7 +124,7 @@
                             id: ' ',
                             name: '所有车型'
                         },
-                        ...response.data.content
+                        ...util.addPrefixForTreeData(response.data.content)
                     ];
                 });
             },
@@ -160,6 +165,14 @@
             },
             onRemoveLogo(file) {
                 this.$refs.table.form.data.logo = null;
+            },
+            onNameChange() {
+                const formData = this.$refs.table.form.data;
+                let name = formData.name;
+                if(name) {
+                    formData.shortname = name;
+                    formData.pinyin = util.getFirstPinyinLetter(name);
+                }
             }
         },
         mounted() {

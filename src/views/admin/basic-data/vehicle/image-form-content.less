@@ -1,0 +1,89 @@
+.parts-images {
+  .upload-wrap {
+    height: 145px;
+    width: 145px;
+    margin-left: 30px;
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .upload-button,
+  .img {
+    height: 145px;
+    width: 145px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 6px;
+    .add-image-btn {
+      margin-top: 44px;
+      font-size: 34px;
+      color: #8c939d;
+    }
+  }
+
+  .upload-button {
+    border: 1px dashed #d9d9d9;
+  }
+
+  .cover,
+  .cover-img {
+    height: 240px;
+    width: 240px;
+    margin-top: 36px;
+    margin-left: 28px;
+    .add-image-btn {
+      margin-top: 100px;
+    }
+  }
+
+  .cover {
+    background-color: #fbfdff;
+  }
+
+  .cover-img,
+  .img {
+    position: relative;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.2);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .cover-img {
+    line-height: 240px;
+    cursor: pointer;
+  }
+
+  .img {
+    line-height: 145px;
+  }
+
+  .upload-list-cover {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,.6);
+  }
+
+  .cover-img:hover .upload-list-cover,
+  .img:hover .upload-list-cover {
+    display: block;
+  }
+
+  .upload-list-cover i{
+    color: #fff;
+    font-size: 40px;
+    cursor: pointer;
+    margin: 0 2px;
+    transition: all .2s;
+  }
+
+  .upload-list-cover i:hover {
+    color: #2d8cf0;
+  }
+}

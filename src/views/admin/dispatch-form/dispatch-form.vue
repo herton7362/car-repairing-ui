@@ -91,7 +91,7 @@
                     ],
                     actions: [
                         (h, params)=> {
-                            if(params.row.status === 'NEW') {
+                            if(params.row.status === 'NEW' || params.row.status === 'CONFIRM') {
                                 return  h('Tooltip', {
                                     props: {
                                         content: '生成领料单',

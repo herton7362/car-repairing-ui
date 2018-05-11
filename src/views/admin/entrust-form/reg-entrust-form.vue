@@ -65,17 +65,19 @@
                         <Col :span="8">
                         <FormItem label="车主" prop="vehicle.memberId">
                             <Select v-model="props.data.vehicle.memberId" placeholder="请选择车主" filterable>
-                                <Option :value="member.id" v-for="member in form.members" :key="member.id">{{member.name}}</Option>
+                                <Option :value="member.id" v-for="member in form.members" :key="member.id">{{member.name || member.mobile}}</Option>
                             </Select>
                         </FormItem>
                         </Col>
                     </Row>
                     <Row>
-                        <Col :span="8">
+                        <Col :span="16">
                         <FormItem label="车型" prop="vehicle.vehicleCategories">
-                            <Cascader ref="vehicleCategories" :data="form.vehicleCategories" v-model="props.data.vehicle.vehicleCategories" placeholder="请选车型"/>
+                            <Cascader ref="vehicleCategories" :data="form.vehicleCategories" v-model="props.data.vehicle.vehicleCategoryId" placeholder="请选车型"/>
                         </FormItem>
                         </Col>
+                    </Row>
+                    <Row>
                         <Col :span="8">
                         <FormItem label="联系电话" prop="contactTel">
                             <Input v-model="props.data.contactTel" placeholder="请输入联系电话"/>
@@ -230,6 +232,27 @@
                                     }
                                 }, '收款')
                             }
+                        },
+                        (h, params)=> {
+                            if(params.row.status === 'NEW' && params.row.origin === 'ONLINE_SHOP') {
+                                return  h('Button', {
+                                    props: {
+                                        type: 'success',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            util.ajax.post(`/api/entrustForm/confirm/${params.row.id}`).then((response)=>{
+                                                this.$Message.success('操作成功');
+                                                this.$refs.table.loadGrid();
+                                            });
+                                        }
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    }
+                                }, '确认')
+                            }
                         }
                     ]
                 },
@@ -255,7 +278,7 @@
                         approachDate: [
                             { required: true, message: '请选择进场时间', trigger: 'change', type: 'date' }
                         ],
-                        'vehicle.vehicleCategories': [
+                        'vehicle.vehicleCategoryId': [
                             { required: true, message: '请选择车型', trigger: 'change', type: 'array' }
                         ],
                         operatorId: [
@@ -284,7 +307,7 @@
                             frameNumber: null,
                             plateNumber: null,
                             memberId: null,
-                            vehicleCategoryId: null,
+                            vehicleCategoryId: [],
                             vehicleCategories: []
                         },
                         approachDate: null,
@@ -335,10 +358,6 @@
                 if(response.data.vehicle) {
                     response.data.vehiclePlateNumber = response.data.vehicle.plateNumber;
                 }
-                if(response.data.vehicle.vehicleCategoryId) {
-                    let category = this.form.vehicleCategoriesRaw.find((d)=>d.id === response.data.vehicle.vehicleCategoryId);
-                    response.data.vehicle.vehicleCategories = [category.parent.id, response.data.vehicle.vehicleCategoryId];
-                }
                 this.$refs.itemPicker.clearSelect();
                 if(response.data.items && response.data.items.length) {
                     this.$refs.itemPicker.select(response.data.items.map((s)=> {
@@ -364,6 +383,9 @@
             },
             formTransformData(data) {
                 data.status = 'NEW';
+                data.payStatus = 'UNPAY';
+                data.payType = 'OFFLINE';
+                data.origin = 'LOCAL';
                 return data;
             },
             onNewModalOpen() {
@@ -481,20 +503,11 @@
             this.$refs.table.$watch('form.data.vehicle.plateNumber', (val) => {
                 this.form.vehicleVisible = !!val;
                 let vehicle = this.form.vehicles.find((d)=>d.plateNumber === val);
-                let vehicleCategories = [];
-                if(vehicle) {
-                    let category = this.form.vehicleCategoriesRaw.find((d)=>d.id === vehicle.vehicleCategoryId);
-                    vehicleCategories = [category.parent.id, vehicle.vehicleCategoryId];
-                }
-                this.$refs.table.form.data.vehicle = Object.assign({vehicleCategories}, vehicle || {
+                this.$refs.table.form.data.vehicle = Object.assign({}, vehicle || {
                     plateNumber:val,
                     isDefault: false
                 });
             });
-            this.$refs.table.$watch('form.data.vehicle.vehicleCategories', function(val) {
-                this.form.data.vehicle.vehicleCategoryId = val[1];
-            })
-            this.defaultQueryParams['creator.id'] = this.loginUser.id;
             this.$refs.table.loadGrid();
             this.loadVehicles();
             this.loadInsuranceCompanies();

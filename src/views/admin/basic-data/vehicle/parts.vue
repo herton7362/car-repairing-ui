@@ -35,6 +35,7 @@
                     <single-table ref="table"
                                   :columns="table.columns"
                                   form-title="零件维护"
+                                  :modal-width="700"
                                   domain-url="parts"
                                   :form-rule="form.rule"
                                   :form-data="form.data"
@@ -50,49 +51,70 @@
                         </template>
 
                         <template slot="edit-form" slot-scope="props">
-                            <FormItem class="padding-right-medium" prop="categoryId" label="零件分类">
-                                <Select v-model="props.data.categoryId" placeholder="请选择零件分类" style="width: 140px;">
-                                    <Option v-for="row in tree.form.select.data" :value="row.id" :key="row.id">{{row.name}}</Option>
-                                </Select>
-                            </FormItem>
-                            <FormItem class="padding-right-medium" prop="code" label="零件编码">
-                                <Input v-model="props.data.code" placeholder="请输入零件编码" style="width: 240px;"/>
-                            </FormItem>
-                            <FormItem class="padding-right-medium" prop="name" label="零件名称">
-                                <Input v-model="props.data.name" placeholder="请输入零件名称" style="width: 240px;"/>
-                            </FormItem>
-                            <FormItem class="padding-right-medium" prop="modelNumber" label="型号">
-                                <Input v-model="props.data.modelNumber" placeholder="请输入型号" style="width: 240px;"/>
-                            </FormItem>
-                            <FormItem class="padding-right-medium" prop="standard" label="规格">
-                                <Input v-model="props.data.standard" placeholder="请输入规格" style="width: 240px;"/>
-                            </FormItem>
-                            <Row>
-                                <Col :span="12">
-                                    <FormItem class="padding-right-medium" prop="originPlace" label="产地">
-                                        <Input v-model="props.data.originPlace" placeholder="请输入产地"/>
-                                    </FormItem>
-                                </Col>
-                                <Col :span="12">
-                                    <FormItem class="padding-right-medium" prop="brand" label="厂牌" :label-width="60">
-                                        <Input v-model="props.data.brand" placeholder="请输入厂牌"/>
-                                    </FormItem>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col :span="12">
-                                    <FormItem class="padding-right-medium" prop="unitId" label="单位">
-                                        <Select v-model="props.data.unitId" placeholder="请选择单位">
-                                            <Option v-for="row in form.unitSelect.data" :value="row.id" :key="row.id">{{row.name}}</Option>
+                            <Tabs type="card">
+                                <TabPane label="基本信息">
+                                    <FormItem class="padding-right-medium" prop="categoryId" label="零件分类">
+                                        <Select v-model="props.data.categoryId" placeholder="请选择零件分类" style="width: 140px;">
+                                            <Option v-for="row in tree.form.select.data" :value="row.id" :key="row.id">{{row.name}}</Option>
                                         </Select>
                                     </FormItem>
-                                </Col>
-                                <Col :span="12">
-                                    <FormItem class="padding-right-medium" prop="price" label="价格" :label-width="60">
-                                        <Input v-model="props.data.price" placeholder="请输入价格"/>
-                                    </FormItem>
-                                </Col>
-                            </Row>
+                                    <Row>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="code" label="零件编码">
+                                            <Input v-model="props.data.code" placeholder="请输入零件编码" />
+                                        </FormItem>
+                                        </Col>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="name" label="零件名称">
+                                            <Input v-model="props.data.name" placeholder="请输入零件名称" />
+                                        </FormItem>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="modelNumber" label="型号">
+                                            <Input v-model="props.data.modelNumber" placeholder="请输入型号"/>
+                                        </FormItem>
+                                        </Col>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="standard" label="规格">
+                                            <Input v-model="props.data.standard" placeholder="请输入规格"/>
+                                        </FormItem>
+                                        </Col>
+                                    </Row>
+
+                                    <Row>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="originPlace" label="产地">
+                                            <Input v-model="props.data.originPlace" placeholder="请输入产地"/>
+                                        </FormItem>
+                                        </Col>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="brand" label="厂牌">
+                                            <Input v-model="props.data.brand" placeholder="请输入厂牌"/>
+                                        </FormItem>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="unitId" label="单位">
+                                            <Select v-model="props.data.unitId" placeholder="请选择单位" transfer>
+                                                <Option v-for="row in form.unitSelect.data" :value="row.id" :key="row.id">{{row.name}}</Option>
+                                            </Select>
+                                        </FormItem>
+                                        </Col>
+                                        <Col :span="12">
+                                        <FormItem class="padding-right-medium" prop="price" label="价格">
+                                            <Input v-model="props.data.price" placeholder="请输入价格"/>
+                                        </FormItem>
+                                        </Col>
+                                    </Row>
+                                </TabPane>
+                                <TabPane label="商品图片管理">
+                                    <image-form-content :form-data="props.data"></image-form-content>
+                                </TabPane>
+                            </Tabs>
                         </template>
                     </single-table>
                 </Row>
@@ -116,10 +138,12 @@
 <script>
 import util from '@/libs/util';
 import singleTable from '@/views/my-components/single-table/single-table.vue';
+import ImageFormContent from './image-form-content.vue';
 
 export default {
     components: {
-        singleTable
+        singleTable,
+        ImageFormContent
     },
     data() {
         return {
@@ -196,7 +220,32 @@ export default {
                     brand: null,
                     unit: null,
                     unitId: '',
-                    price: null
+                    price: null,
+                    partsCoverImage: {
+                        id: null,
+                        isCover: true,
+                        attachmentId: null
+                    },
+                    partsAttached1Image: {
+                        id: null,
+                        isCover: false,
+                        attachmentId: null
+                    },
+                    partsAttached2Image: {
+                        id: null,
+                        isCover: false,
+                        attachmentId: null
+                    },
+                    partsAttached3Image: {
+                        id: null,
+                        isCover: false,
+                        attachmentId: null
+                    },
+                    partsAttached4Image: {
+                        id: null,
+                        isCover: false,
+                        attachmentId: null
+                    }
                 }
             }
         }
@@ -322,6 +371,11 @@ export default {
         },
         onNewModalOpen() {
             this.$refs.table.form.data.categoryId = this.tree.selected.id;
+            this.$refs.table.form.data.partsCoverImage = this.form.data.partsCoverImage;
+            this.$refs.table.form.data.partsAttached1Image = this.form.data.partsAttached1Image;
+            this.$refs.table.form.data.partsAttached2Image = this.form.data.partsAttached2Image;
+            this.$refs.table.form.data.partsAttached3Image = this.form.data.partsAttached3Image;
+            this.$refs.table.form.data.partsAttached4Image = this.form.data.partsAttached4Image;
         },
         loadUnit() {
             util.ajax.get('/api/dictionary/code/unit', {

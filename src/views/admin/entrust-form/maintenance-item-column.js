@@ -6,7 +6,7 @@ export default [
         align: 'center',
         width: 120,
         render(h, param) {
-            return h('span', param.row.workingTeam.name)
+            return h('span', param.row.workingTeam && param.row.workingTeam.name)
         }
     },
     {
@@ -15,7 +15,7 @@ export default [
         align: 'center',
         width: 120,
         render(h, param) {
-            return h('span', param.row.workingTeam.name)
+            return h('span', param.row.workingTeam && param.row.workingTeam.name)
         }
     },
     {key: 'manHourPrice',title: '工时金额', align: 'right'}

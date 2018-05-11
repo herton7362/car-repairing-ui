@@ -12,10 +12,11 @@ export default [
         key: 'operatorId',
         title: '接车员',
         render(h, param){
-            let span = h('span',[h('Spin')]);
-            util.ajax.get(`/api/admin/${param.row.operatorId}`).then((response)=>{
-                span.elm.innerHTML = response.data.name;
-            })
+            let span = h('span', '...');
+            if(param.row.operatorId)
+                util.ajax.get(`/api/admin/${param.row.operatorId}`).then((response)=>{
+                    span.elm.innerHTML = response.data.name;
+                })
             return span;
         }
     },
@@ -23,10 +24,11 @@ export default [
         key: 'clerkId',
         title: '业务员',
         render(h, param){
-            let span = h('span',[h('Spin')]);
-            util.ajax.get(`/api/admin/${param.row.clerkId}`).then((response)=>{
-                span.elm.innerHTML = response.data.name;
-            })
+            let span = h('span', '...');
+            if(param.row.clerkId)
+                util.ajax.get(`/api/admin/${param.row.clerkId}`).then((response)=>{
+                    span.elm.innerHTML = response.data.name;
+                })
             return span;
         }
     },
@@ -37,12 +39,27 @@ export default [
         render(h, param){
             if(param.row.status === 'NEW') {
                 return h('Tag', {props: {type: 'dot',color: 'blue',size: 'small'}}, '新建');
+            } else if(param.row.status === 'CONFIRM') {
+                return h('Tag', {props: {type: 'dot',color: 'blue',size: 'small'}}, '已确认');
             } else if(param.row.status === 'DISPATCHING') {
                 return h('Tag', {props: {type: 'dot',color: 'yellow',size: 'small'}}, '派工');
             } else if(param.row.status === 'FINISHED') {
                 return h('Tag', {props: {type: 'dot',color: 'green',size: 'small'}}, '竣工');
             } else {
                 return h('Tag', {props: {type: 'dot',color: '#999',size: 'small'}}, '未知');
+            }
+        }
+    },
+    {
+        title: '来源',
+        width: 150,
+        render(h, param){
+            if(param.row.origin === 'LOCAL') {
+                return '本地创建';
+            } else if(param.row.origin === 'ONLINE_SHOP') {
+                return '线上商城';
+            } {
+                return '未知';
             }
         }
     },
